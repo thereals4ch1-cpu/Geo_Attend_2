@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; 
 import axios from 'axios';
 
 function Login() {
@@ -111,7 +111,4 @@ const styles = {
 };
 
 export default Login;
-
-
-print("I'm Hungry");
 
