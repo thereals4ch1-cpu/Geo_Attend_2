@@ -41,6 +41,21 @@
   background-color: #5a6268;
 }
 
+.employee-profile-button {
+  padding: 10px 20px;
+  background-color: #ffc107;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+  font-weight: 500;
+}
+
+.employee-profile-button:hover {
+  background-color: #e0a800;
+}
+
 .employee-content {
   padding: 20px;
   display: grid;

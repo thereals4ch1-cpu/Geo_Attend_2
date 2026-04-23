@@ -359,6 +359,12 @@ function EmployeeDashboard() {
         <h1>Employee Dashboard</h1>
         <div>
           <button 
+            onClick={() => navigate('/profile')} 
+            className="employee-profile-button"
+          >
+            My Profile
+          </button>
+          <button 
             onClick={() => {
               setShowHistory(!showHistory);
               if (!showHistory) loadAttendanceHistory();

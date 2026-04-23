@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; 
 import axios from 'axios';
+import { auth, provider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
 import '../css/Login.css';
 
 function Login() {
@@ -34,6 +36,24 @@ function Login() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setError('');
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const userData = {
+        uid: user.uid,
+        name: user.displayName || '',
+        email: user.email || '',
+        role: 'employee'
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+      navigate('/employee');
+    } catch (err) {
+      setError(err.message || 'Google sign in failed');
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="login-form-container">
@@ -58,6 +78,14 @@ function Login() {
           />
           <button type="submit" className="login-button">Login</button>
         </form>
+        <button type="button" className="google-button" onClick={handleGoogleLogin}>
+          <svg className="google-logo" viewBox="0 0 24 24" width="20" height="20">
+            <circle cx="12" cy="12" r="10" fill="#4285f4"/>
+            <circle cx="12" cy="12" r="9" fill="white"/>
+            <path d="M12 5C8.13 5 5 8.13 5 12s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm3.5 8h-2.5v2.5h-2v-2.5H8v-2h2.5V8.5h2v2.5h2.5v2z" fill="#4285f4"/>
+          </svg>
+          Continue with Google
+        </button>
         <p className="login-link">
           Don't have an account? <Link to="/signup">Signup here</Link>
         </p>
