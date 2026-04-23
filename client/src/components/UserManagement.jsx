@@ -10,6 +10,8 @@ function UserManagement() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,6 +22,20 @@ function UserManagement() {
     }
     loadUsers();
   }, [navigate]);
+
+  const filteredUsers = users.filter((user) => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch =
+      user.name?.toLowerCase().includes(term) ||
+      user.email?.toLowerCase().includes(term) ||
+      user.role?.toLowerCase().includes(term);
+    const matchesRole = filterRole === 'all' || user.role === filterRole;
+    return matchesSearch && matchesRole;
+  });
+
+  const totalUsers = users.length;
+  const adminCount = users.filter((user) => user.role === 'admin').length;
+  const employeeCount = users.filter((user) => user.role === 'employee').length;
 
   const loadUsers = async () => {
     setLoading(true);
@@ -99,11 +115,47 @@ function UserManagement() {
       {error && <div className="user-management-error">{error}</div>}
       {success && <div className="user-management-success">{success}</div>}
 
+      <div className="user-management-toolbar">
+        <div className="user-management-summary">
+          <div>Total users: <strong>{totalUsers}</strong></div>
+          <div>Admins: <strong>{adminCount}</strong></div>
+          <div>Employees: <strong>{employeeCount}</strong></div>
+        </div>
+        <div className="user-management-filters">
+          <input
+            type="text"
+            placeholder="Search by name, email or role"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="user-management-search-input"
+          />
+          <select
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            className="user-management-filter-select"
+          >
+            <option value="all">All roles</option>
+            <option value="employee">Employee</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div className="user-management-toolbar-buttons">
+          <button onClick={loadUsers} className="user-management-refresh-button">
+            Refresh
+          </button>
+          <button onClick={() => navigate('/signup')} className="user-management-add-button">
+            Add User
+          </button>
+        </div>
+      </div>
+
       <div className="user-management-content">
         {loading ? (
           <div className="user-management-loading">Loading users...</div>
         ) : users.length === 0 ? (
           <div className="user-management-empty">No users found</div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="user-management-empty">No users match your search criteria</div>
         ) : (
           <div className="user-management-table-container">
             <table className="user-management-table">
@@ -117,7 +169,7 @@ function UserManagement() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user.id}>
                     <td>{user.name || 'N/A'}</td>
                     <td>{user.email || 'N/A'}</td>
