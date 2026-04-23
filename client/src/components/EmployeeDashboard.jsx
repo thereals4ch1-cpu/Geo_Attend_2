@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Circle, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
+import '../css/EmployeeDashboard.css';
 
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -353,8 +354,8 @@ function EmployeeDashboard() {
   }, [navigate]);
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
+    <div className="employee-container">
+      <div className="employee-header">
         <h1>Employee Dashboard</h1>
         <div>
           <button 
@@ -362,23 +363,23 @@ function EmployeeDashboard() {
               setShowHistory(!showHistory);
               if (!showHistory) loadAttendanceHistory();
             }} 
-            style={styles.historyButton}
+            className="employee-history-button"
           >
             {showHistory ? 'Hide History' : 'My Attendance History'}
           </button>
-          <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+          <button onClick={handleLogout} className="employee-logout-button">Logout</button>
         </div>
       </div>
       
-      <div style={styles.content}>
-        <div style={styles.leftPanel}>
-          <div style={styles.userInfo}>
+      <div className="employee-content">
+        <div className="employee-left-panel">
+          <div className="employee-user-info">
             <h2>Welcome, {user?.name}!</h2>
             <p>📧 {user?.email}</p>
           </div>
           
           {location && (
-            <div style={styles.locationInfo}>
+            <div className="employee-location-info">
               <p>📍 Current Location:</p>
               <p>Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}</p>
               <p>🎯 Accuracy: ±{location.accuracy?.toFixed(1)}m</p>
@@ -388,15 +389,15 @@ function EmployeeDashboard() {
             </div>
           )}
           
-          <div style={styles.fenceStatus}>
+          <div className="employee-fence-status">
             {insideFence ? (
-              <div style={styles.insideFence}>
+              <div className="employee-inside-fence">
                 <h3>✅ Inside Geo-Fence: {currentFence?.name}</h3>
                 <p>You are {currentDistance?.toFixed(2)}m from the center (Radius: {currentFence?.radius}m)</p>
                 <p>You can mark your attendance!</p>
               </div>
             ) : (
-              <div style={styles.outsideFence}>
+              <div className="employee-outside-fence">
                 <h3>❌ Outside Geo-Fence</h3>
                 <p>Please move to the designated area to mark attendance</p>
               </div>
@@ -404,20 +405,20 @@ function EmployeeDashboard() {
           </div>
           
           {message && (
-            <div style={styles.message}>
+            <div className="employee-message">
               {message}
             </div>
           )}
           
-          <div style={styles.attendanceButtons}>
+          <div className="employee-attendance-buttons">
             <button 
               onClick={() => markAttendance('in')}
               disabled={attendanceStatus?.checkIn}
               style={{
-                ...styles.checkInButton,
                 opacity: attendanceStatus?.checkIn ? 0.5 : 1,
                 backgroundColor: insideFence && !attendanceStatus?.checkIn ? '#28a745' : '#6c757d'
               }}
+              className="employee-check-in-button"
             >
               {attendanceStatus?.checkIn ? '✓ Checked In' : 'Check In'}
             </button>
@@ -426,17 +427,17 @@ function EmployeeDashboard() {
               onClick={() => markAttendance('out')}
               disabled={!attendanceStatus?.checkIn || attendanceStatus?.checkOut}
               style={{
-                ...styles.checkOutButton,
                 opacity: (!attendanceStatus?.checkIn || attendanceStatus?.checkOut) ? 0.5 : 1,
                 backgroundColor: insideFence && attendanceStatus?.checkIn && !attendanceStatus?.checkOut ? '#dc3545' : '#6c757d'
               }}
+              className="employee-check-out-button"
             >
               {attendanceStatus?.checkOut ? '✓ Checked Out' : 'Check Out'}
             </button>
           </div>
           
           {attendanceStatus && (
-            <div style={styles.attendanceInfo}>
+            <div className="employee-attendance-info">
               <h3>Today's Attendance</h3>
               <p>🕐 Check-in: {attendanceStatus.checkIn || 'Not checked in'}</p>
               <p>🕐 Check-out: {attendanceStatus.checkOut || 'Not checked out'}</p>
@@ -444,8 +445,8 @@ function EmployeeDashboard() {
           )}
         </div>
         
-        <div style={styles.rightPanel}>
-          <div style={styles.mapContainer}>
+        <div className="employee-right-panel">
+          <div className="employee-map-container">
             <h2>Map View</h2>
             <div style={{ height: '400px', width: '100%' }}>
               <MapContainer
@@ -510,15 +511,15 @@ function EmployeeDashboard() {
               </MapContainer>
             </div>
             
-            <div style={styles.mapLegend}>
-              <div><span style={styles.greenDot}></span> Your Location</div>
-              <div><span style={styles.redDot}></span> Geo-Fence Center</div>
-              <div><span style={styles.redCircle}></span> Geo-Fence Area</div>
-              {insideFence && <div><span style={styles.greenCircle}></span> You are inside this fence</div>}
+            <div className="employee-map-legend">
+              <div><span className="employee-green-dot"></span> Your Location</div>
+              <div><span className="employee-red-dot"></span> Geo-Fence Center</div>
+              <div><span className="employee-red-circle"></span> Geo-Fence Area</div>
+              {insideFence && <div><span className="employee-green-circle"></span> You are inside this fence</div>}
             </div>
           </div>
           
-          <div style={styles.fencesList}>
+          <div className="employee-fences-list">
             <h3>Nearby Geo-Fences</h3>
             {fences.map((fence) => {
               const distance = location ? calculateDistance(
@@ -532,16 +533,16 @@ function EmployeeDashboard() {
                 <div 
                   key={fence.id} 
                   style={{
-                    ...styles.fenceCard,
                     backgroundColor: isInside ? '#d4edda' : '#f9f9f9',
                     border: isInside ? '2px solid #28a745' : '1px solid #ddd'
                   }}
+                  className="employee-fence-card"
                 >
                   <strong>{fence.name}</strong>
                   <p>📍 Distance: {distance.toFixed(2)}m (Radius: {fence.radius}m)</p>
-                  {isInside && <p style={styles.insideText}>✅ You are inside this fence!</p>}
+                  {isInside && <p className="employee-inside-text">✅ You are inside this fence!</p>}
                   {!isInside && distance > 0 && (
-                    <p style={styles.outsideText}>❌ Need to move {Math.abs(distance - fence.radius).toFixed(2)}m closer</p>
+                    <p className="employee-outside-text">❌ Need to move {Math.abs(distance - fence.radius).toFixed(2)}m closer</p>
                   )}
                 </div>
               );
@@ -552,30 +553,30 @@ function EmployeeDashboard() {
 
       {/* Attendance History Section */}
       {showHistory && (
-        <div style={styles.historySection}>
+        <div className="employee-history-section">
           <h3>My Attendance History</h3>
-          <div style={styles.historyList}>
+          <div className="employee-history-list">
             {attendanceHistory.length === 0 ? (
               <p>No attendance records found.</p>
             ) : (
               attendanceHistory.map((record) => (
-                <div key={record.id} style={styles.historyCard}>
-                  <div style={styles.historyDate}>
+                <div key={record.id} className="employee-history-card">
+                  <div className="employee-history-date">
                     <strong>{record.date} ({record.dateString})</strong>
                   </div>
-                  <div style={styles.historyTimes}>
+                  <div className="employee-history-times">
                     <span>✅ Check In: {record.checkInTime}</span>
                     {record.checkOutTime && (
                       <span>❌ Check Out: {record.checkOutTime}</span>
                     )}
                   </div>
-                  <div style={styles.historyLocation}>
+                  <div className="employee-history-location">
                     📍 Fence: {record.fenceLocation?.name || 'N/A'}
                     {record.fenceLocation?.distance && (
                       <span> (Distance: {record.fenceLocation.distance.toFixed(2)}m)</span>
                     )}
                   </div>
-                  <div style={styles.historyStatus}>
+                  <div className="employee-history-status">
                     Status: {record.status === 'completed' ? '✅ Completed' : '🟡 Active'}
                   </div>
                 </div>
@@ -587,235 +588,5 @@ function EmployeeDashboard() {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f0f0f0'
-  },
-  header: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    padding: '20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '10px'
-  },
-  logoutButton: {
-    padding: '10px 20px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  },
-  historyButton: {
-    padding: '10px 20px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginRight: '10px'
-  },
-  content: {
-    padding: '20px',
-    display: 'grid',
-    gridTemplateColumns: '1fr 1.5fr',
-    gap: '20px'
-  },
-  leftPanel: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px'
-  },
-  rightPanel: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px'
-  },
-  userInfo: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  locationInfo: {
-    backgroundColor: '#e9ecef',
-    padding: '15px',
-    borderRadius: '8px'
-  },
-  fenceStatus: {
-    marginBottom: '0'
-  },
-  insideFence: {
-    backgroundColor: '#d4edda',
-    color: '#155724',
-    padding: '20px',
-    borderRadius: '8px',
-    textAlign: 'center'
-  },
-  outsideFence: {
-    backgroundColor: '#f8d7da',
-    color: '#721c24',
-    padding: '20px',
-    borderRadius: '8px',
-    textAlign: 'center'
-  },
-  message: {
-    backgroundColor: '#fff3cd',
-    color: '#856404',
-    padding: '15px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    fontWeight: 'bold'
-  },
-  attendanceButtons: {
-    display: 'flex',
-    gap: '20px',
-    justifyContent: 'center'
-  },
-  checkInButton: {
-    flex: 1,
-    padding: '15px',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '18px',
-    cursor: 'pointer',
-    transition: 'all 0.3s'
-  },
-  checkOutButton: {
-    flex: 1,
-    padding: '15px',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '18px',
-    cursor: 'pointer',
-    transition: 'all 0.3s'
-  },
-  attendanceInfo: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  mapContainer: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  fencesList: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    maxHeight: '300px',
-    overflowY: 'auto'
-  },
-  fenceCard: {
-    borderRadius: '8px',
-    padding: '10px',
-    marginBottom: '10px',
-    cursor: 'pointer',
-    transition: 'all 0.3s'
-  },
-  insideText: {
-    color: '#28a745',
-    fontWeight: 'bold',
-    marginTop: '5px'
-  },
-  outsideText: {
-    color: '#dc3545',
-    fontSize: '12px',
-    marginTop: '5px'
-  },
-  mapLegend: {
-    marginTop: '10px',
-    padding: '10px',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '4px',
-    display: 'flex',
-    gap: '20px',
-    fontSize: '12px',
-    flexWrap: 'wrap'
-  },
-  greenDot: {
-    display: 'inline-block',
-    width: '12px',
-    height: '12px',
-    backgroundColor: '#00ff00',
-    borderRadius: '50%',
-    marginRight: '5px'
-  },
-  redDot: {
-    display: 'inline-block',
-    width: '12px',
-    height: '12px',
-    backgroundColor: '#ff0000',
-    borderRadius: '50%',
-    marginRight: '5px'
-  },
-  redCircle: {
-    display: 'inline-block',
-    width: '12px',
-    height: '12px',
-    border: '2px solid #ff0000',
-    borderRadius: '50%',
-    marginRight: '5px',
-    backgroundColor: 'rgba(255,0,0,0.2)'
-  },
-  greenCircle: {
-    display: 'inline-block',
-    width: '12px',
-    height: '12px',
-    border: '2px solid #00ff00',
-    borderRadius: '50%',
-    marginRight: '5px',
-    backgroundColor: 'rgba(0,255,0,0.2)'
-  },
-  historySection: {
-    margin: '20px',
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  historyList: {
-    maxHeight: '400px',
-    overflowY: 'auto'
-  },
-  historyCard: {
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    padding: '15px',
-    marginBottom: '10px',
-    backgroundColor: '#f9f9f9'
-  },
-  historyDate: {
-    fontSize: '16px',
-    marginBottom: '10px',
-    color: '#007bff'
-  },
-  historyTimes: {
-    display: 'flex',
-    gap: '20px',
-    marginBottom: '10px',
-    flexWrap: 'wrap'
-  },
-  historyLocation: {
-    fontSize: '14px',
-    color: '#666',
-    marginBottom: '5px'
-  },
-  historyStatus: {
-    fontSize: '14px',
-    fontWeight: 'bold'
-  }
-};
 
 export default EmployeeDashboard;

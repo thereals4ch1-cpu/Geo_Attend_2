@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Circle, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
+import '../css/AdminDashboard.css';
 
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -190,8 +191,8 @@ function AdminDashboard() {
   }, [navigate]);
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
+    <div className="admin-container">
+      <div className="admin-header">
         <h1>Admin Dashboard - Geo-Fence Manager</h1>
         <div>
           <button 
@@ -199,7 +200,7 @@ function AdminDashboard() {
               setShowEmployees(!showEmployees);
               if (!showEmployees) loadEmployees();
             }} 
-            style={styles.employeesButton}
+            className="admin-employees-button"
           >
             {showEmployees ? 'Hide Employees' : 'View Employees'}
           </button>
@@ -208,16 +209,16 @@ function AdminDashboard() {
               setShowAttendance(!showAttendance);
               if (!showAttendance) loadAttendanceRecords();
             }} 
-            style={styles.attendanceButton}
+            className="admin-attendance-button"
           >
             {showAttendance ? 'Hide Attendance' : 'View Attendance'}
           </button>
-          <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+          <button onClick={handleLogout} className="admin-logout-button">Logout</button>
         </div>
       </div>
       
-      <div style={styles.content}>
-        <div style={styles.createFence}>
+      <div className="admin-content">
+        <div className="admin-create-fence">
           <h2>Create Geo-Fence</h2>
           <form onSubmit={handleCreateFence}>
             <input
@@ -225,7 +226,7 @@ function AdminDashboard() {
               placeholder="Fence Name (e.g., Office, Warehouse)"
               value={fenceName}
               onChange={(e) => setFenceName(e.target.value)}
-              style={styles.input}
+              className="admin-input"
               required
             />
             <input
@@ -233,7 +234,7 @@ function AdminDashboard() {
               placeholder="Latitude"
               value={latitude}
               onChange={(e) => setLatitude(e.target.value)}
-              style={styles.input}
+              className="admin-input"
               required
               step="any"
             />
@@ -242,7 +243,7 @@ function AdminDashboard() {
               placeholder="Longitude"
               value={longitude}
               onChange={(e) => setLongitude(e.target.value)}
-              style={styles.input}
+              className="admin-input"
               required
               step="any"
             />
@@ -251,24 +252,24 @@ function AdminDashboard() {
               placeholder="Radius (meters) - Recommend 100-200m"
               value={radius}
               onChange={(e) => setRadius(e.target.value)}
-              style={styles.input}
+              className="admin-input"
               required
             />
-            <button type="button" onClick={useCurrentLocation} style={styles.useLocationButton}>
+            <button type="button" onClick={useCurrentLocation} className="admin-use-location-button">
               📍 Use My Current Location
             </button>
-            <button type="submit" style={styles.createButton}>Create Geo-Fence</button>
+            <button type="submit" className="admin-create-button">Create Geo-Fence</button>
           </form>
           
           {userLocation && (
-            <div style={styles.locationInfo}>
+            <div className="admin-location-info">
               <p>📍 Your Current Location:</p>
               <p>Lat: {userLocation.lat.toFixed(6)}, Lng: {userLocation.lng.toFixed(6)}</p>
             </div>
           )}
         </div>
         
-        <div style={styles.mapContainer}>
+        <div className="admin-map-container">
           <h2>Map View</h2>
           <div style={{ height: '400px', width: '100%' }}>
             <MapContainer
@@ -303,7 +304,7 @@ function AdminDashboard() {
                         📏 Radius: {fence.radius}m<br />
                         <button 
                           onClick={() => handleDeleteFence(fence.id)}
-                          style={styles.popupButton}
+                          className="admin-popup-button"
                         >
                           Delete
                         </button>
@@ -325,23 +326,23 @@ function AdminDashboard() {
             </MapContainer>
           </div>
           
-          <div style={styles.mapLegend}>
-            <div><span style={styles.greenDot}></span> Your Location</div>
-            <div><span style={styles.redDot}></span> Geo-Fence Center</div>
-            <div><span style={styles.redCircle}></span> Geo-Fence Area</div>
+          <div className="admin-map-legend">
+            <div><span className="admin-green-dot"></span> Your Location</div>
+            <div><span className="admin-red-dot"></span> Geo-Fence Center</div>
+            <div><span className="admin-red-circle"></span> Geo-Fence Area</div>
             <div>💡 Click on map to select location</div>
           </div>
         </div>
       </div>
       
-      <div style={styles.fencesList}>
+      <div className="admin-fences-list">
         <h2>Existing Geo-Fences</h2>
-        <div style={styles.fencesGrid}>
+        <div className="admin-fences-grid">
           {fences.length === 0 ? (
             <p>No geo-fences created yet. Create one above!</p>
           ) : (
             fences.map((fence) => (
-              <div key={fence.id} style={styles.fenceCard}>
+              <div key={fence.id} className="admin-fence-card">
                 <h3>{fence.name}</h3>
                 <p>📍 {fence.latitude.toFixed(6)}, {fence.longitude.toFixed(6)}</p>
                 <p>📏 Radius: {fence.radius} meters</p>
@@ -351,13 +352,13 @@ function AdminDashboard() {
                     setMapCenter([fence.latitude, fence.longitude]);
                     setSelectedFence(fence);
                   }}
-                  style={styles.viewButton}
+                  className="admin-view-button"
                 >
                   View on Map
                 </button>
                 <button 
                   onClick={() => handleDeleteFence(fence.id)}
-                  style={styles.deleteButton}
+                  className="admin-delete-button"
                 >
                   Delete
                 </button>
@@ -369,10 +370,10 @@ function AdminDashboard() {
 
       {/* Employees Section */}
       {showEmployees && (
-        <div style={styles.section}>
+        <div className="admin-section">
           <h2>Registered Employees</h2>
-          <div style={styles.tableContainer}>
-            <table style={styles.table}>
+          <div className="admin-table-container">
+            <table className="admin-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -398,10 +399,10 @@ function AdminDashboard() {
 
       {/* Attendance Records Section */}
       {showAttendance && (
-        <div style={styles.section}>
+        <div className="admin-section">
           <h2>Attendance Records</h2>
-          <div style={styles.tableContainer}>
-            <table style={styles.table}>
+          <div className="admin-table-container">
+            <table className="admin-table">
               <thead>
                 <tr>
                   <th>Employee Name</th>
@@ -443,205 +444,5 @@ function AdminDashboard() {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f0f0f0'
-  },
-  header: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: '20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '10px'
-  },
-  logoutButton: {
-    padding: '10px 20px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginLeft: '10px'
-  },
-  attendanceButton: {
-    padding: '10px 20px',
-    backgroundColor: '#17a2b8',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginRight: '10px'
-  },
-  employeesButton: {
-    padding: '10px 20px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginRight: '10px'
-  },
-  content: {
-    padding: '20px',
-    display: 'grid',
-    gridTemplateColumns: '1fr 1.5fr',
-    gap: '20px'
-  },
-  createFence: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  mapContainer: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  fencesList: {
-    margin: '20px',
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  fencesGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '15px',
-    marginTop: '15px'
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '14px'
-  },
-  createButton: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginTop: '10px'
-  },
-  useLocationButton: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#17a2b8',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginTop: '10px'
-  },
-  locationInfo: {
-    marginTop: '20px',
-    padding: '10px',
-    backgroundColor: '#e9ecef',
-    borderRadius: '4px'
-  },
-  fenceCard: {
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    padding: '15px',
-    backgroundColor: '#f9f9f9'
-  },
-  viewButton: {
-    marginTop: '10px',
-    padding: '8px 16px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginRight: '10px'
-  },
-  deleteButton: {
-    marginTop: '10px',
-    padding: '8px 16px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  },
-  popupButton: {
-    marginTop: '8px',
-    padding: '5px 10px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  },
-  mapLegend: {
-    marginTop: '10px',
-    padding: '10px',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '4px',
-    display: 'flex',
-    gap: '20px',
-    fontSize: '12px',
-    flexWrap: 'wrap'
-  },
-  greenDot: {
-    display: 'inline-block',
-    width: '12px',
-    height: '12px',
-    backgroundColor: '#00ff00',
-    borderRadius: '50%',
-    marginRight: '5px'
-  },
-  redDot: {
-    display: 'inline-block',
-    width: '12px',
-    height: '12px',
-    backgroundColor: '#ff0000',
-    borderRadius: '50%',
-    marginRight: '5px'
-  },
-  redCircle: {
-    display: 'inline-block',
-    width: '12px',
-    height: '12px',
-    border: '2px solid #ff0000',
-    borderRadius: '50%',
-    marginRight: '5px',
-    backgroundColor: 'rgba(255,0,0,0.2)'
-  },
-  section: {
-    margin: '20px',
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  tableContainer: {
-    overflowX: 'auto',
-    marginTop: '15px'
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: '14px'
-  },
-  th: {
-    border: '1px solid #ddd',
-    padding: '12px',
-    textAlign: 'left',
-    backgroundColor: '#f2f2f2'
-  }
-};
 
 export default AdminDashboard;
