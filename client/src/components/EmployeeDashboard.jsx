@@ -50,6 +50,8 @@ function EmployeeDashboard() {
   const [showHistory, setShowHistory] = useState(false);
   const navigate = useNavigate();
 
+  const getUserId = (userData) => userData?.id || userData?.uid || userData?.userId || null;
+
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
@@ -83,10 +85,14 @@ function EmployeeDashboard() {
     try {
       const today = new Date().toISOString().split('T')[0];
       const userData = JSON.parse(localStorage.getItem('user'));
+      const userId = getUserId(userData);
+      if (!userId) {
+        throw new Error('Missing user ID in localStorage');
+      }
       
       const q = query(
         collection(db, 'attendance'),
-        where('employeeId', '==', userData.id),
+        where('employeeId', '==', userId),
         where('date', '==', today)
       );
       
@@ -107,7 +113,11 @@ function EmployeeDashboard() {
   const loadAttendanceHistory = async () => {
     try {
       const userData = JSON.parse(localStorage.getItem('user'));
-      const response = await axios.get(`http://localhost:5000/api/attendance/employee/${userData.id}`);
+      const userId = getUserId(userData);
+      if (!userId) {
+        throw new Error('Missing user ID in localStorage');
+      }
+      const response = await axios.get(`http://localhost:5000/api/attendance/employee/${userId}`);
       setAttendanceHistory(response.data);
       console.log('Loaded history:', response.data);
     } catch (error) {
@@ -215,6 +225,12 @@ function EmployeeDashboard() {
 
     try {
       const userData = JSON.parse(localStorage.getItem('user'));
+      const userId = getUserId(userData);
+      if (!userId) {
+        setMessage('❌ Unable to mark attendance: user ID missing. Please log in again.');
+        setTimeout(() => setMessage(''), 5000);
+        return;
+      }
       const now = new Date();
       const today = now.toISOString().split('T')[0];
       const time = now.toLocaleTimeString();
@@ -228,7 +244,7 @@ function EmployeeDashboard() {
         }
         
         const attendanceRecord = {
-          employeeId: userData.id,
+          employeeId: userId,
           employeeName: userData.name,
           employeeEmail: userData.email,
           date: today,
@@ -280,7 +296,7 @@ function EmployeeDashboard() {
         
         const q = query(
           collection(db, 'attendance'),
-          where('employeeId', '==', userData.id),
+          where('employeeId', '==', userId),
           where('date', '==', today)
         );
         

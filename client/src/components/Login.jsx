@@ -42,6 +42,7 @@ function Login() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const userData = {
+        id: user.uid,
         uid: user.uid,
         name: user.displayName || '',
         email: user.email || '',
