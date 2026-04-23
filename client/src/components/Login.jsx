@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; 
+import { useNavigate, Link } from 'react-router-dom'; // PQR
 import axios from 'axios';
 import { auth, provider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { MapContainer, TileLayer, Marker, Circle, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Circle, Popup, useMapEvent } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import '../css/AdminDashboard.css';
+
+const GOOGLE_MAPS_API_KEY = 'AIzaSyBje4_Uub9kYDf4H237qQ1xmNktwmBMMuM';
 
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -35,10 +37,6 @@ function AdminDashboard() {
   const [userLocation, setUserLocation] = useState(null);
   const [mapCenter, setMapCenter] = useState([6.9271, 79.8612]);
   const [selectedFence, setSelectedFence] = useState(null);
-  const [attendanceRecords, setAttendanceRecords] = useState([]);
-  const [showAttendance, setShowAttendance] = useState(false);
-  const [employees, setEmployees] = useState([]);
-  const [showEmployees, setShowEmployees] = useState(false);
   const navigate = useNavigate();
 
   const loadFences = async () => {
@@ -52,33 +50,6 @@ function AdminDashboard() {
       console.log('Loaded fences:', fencesData);
     } catch (error) {
       console.error('Error loading fences:', error);
-    }
-  };
-
-  const loadEmployees = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'users'));
-      const employeesData = [];
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        if (userData.role === 'employee') {
-          employeesData.push({ id: doc.id, ...userData });
-        }
-      });
-      setEmployees(employeesData);
-      console.log('Loaded employees:', employeesData);
-    } catch (error) {
-      console.error('Error loading employees:', error);
-    }
-  };
-
-  const loadAttendanceRecords = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/attendance/all');
-      setAttendanceRecords(response.data);
-      console.log('Loaded attendance records:', response.data);
-    } catch (error) {
-      console.error('Error loading attendance:', error);
     }
   };
 
@@ -179,6 +150,11 @@ function AdminDashboard() {
     navigate('/');
   };
 
+  function MapClickHandler() {
+    useMapEvent('click', handleMapClick);
+    return null;
+  }
+
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || user.role !== 'admin') {
@@ -187,7 +163,6 @@ function AdminDashboard() {
     }
     loadFences();
     getCurrentLocation();
-    loadEmployees();
   }, [navigate]);
 
   return (
@@ -207,25 +182,7 @@ function AdminDashboard() {
           >
             My Profile
           </button>
-          <button 
-            onClick={() => {
-              setShowEmployees(!showEmployees);
-              if (!showEmployees) loadEmployees();
-            }} 
-            className="admin-employees-button"
-          >
-            {showEmployees ? 'Hide Employees' : 'View Employees'}
-          </button>
-          <button 
-            onClick={() => {
-              setShowAttendance(!showAttendance);
-              if (!showAttendance) loadAttendanceRecords();
-            }} 
-            className="admin-attendance-button"
-          >
-            {showAttendance ? 'Hide Attendance' : 'View Attendance'}
-          </button>
-          <button onClick={handleLogout} className="admin-logout-button">Logout</button>
+              <button onClick={handleLogout} className="admin-logout-button">Logout</button>
         </div>
       </div>
       
@@ -288,12 +245,13 @@ function AdminDashboard() {
               center={mapCenter}
               zoom={15}
               style={{ height: '100%', width: '100%', borderRadius: '8px' }}
-              onClick={handleMapClick}
             >
               <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url={`https://mt{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}&key=${GOOGLE_MAPS_API_KEY}`}
+                subdomains={['0', '1', '2', '3']}
+                attribution='Map data ©2026 Google'
               />
+              <MapClickHandler />
               
               {userLocation && (
                 <Marker position={[userLocation.lat, userLocation.lng]} icon={greenIcon}>
@@ -379,80 +337,6 @@ function AdminDashboard() {
           )}
         </div>
       </div>
-
-      {/* Employees Section */}
-      {showEmployees && (
-        <div className="admin-section">
-          <h2>Registered Employees</h2>
-          <div className="admin-table-container">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Registered Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employees.map((employee) => (
-                  <tr key={employee.id}>
-                    <td>{employee.name}</td>
-                    <td>{employee.email}</td>
-                    <td>{employee.role}</td>
-                    <td>{employee.createdAt?.toDate ? new Date(employee.createdAt.toDate()).toLocaleDateString() : 'N/A'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Attendance Records Section */}
-      {showAttendance && (
-        <div className="admin-section">
-          <h2>Attendance Records</h2>
-          <div className="admin-table-container">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Employee Name</th>
-                  <th>Email</th>
-                  <th>Date</th>
-                  <th>Check In</th>
-                  <th>Check Out</th>
-                  <th>Fence Location</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendanceRecords.map((record) => (
-                  <tr key={record.id}>
-                    <td>{record.employeeName}</td>
-                    <td>{record.employeeEmail}</td>
-                    <td>{record.date}</td>
-                    <td>{record.checkInTime}</td>
-                    <td>{record.checkOutTime || 'Not checked out'}</td>
-                    <td>{record.fenceLocation?.name || 'N/A'}</td>
-                    <td style={{
-                      color: record.status === 'completed' ? 'green' : 'orange',
-                      fontWeight: 'bold'
-                    }}>
-                      {record.status === 'completed' ? '✅ Completed' : '🟡 Active'}
-                    </td>
-                  </tr>
-                ))}
-                {attendanceRecords.length === 0 && (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: 'center' }}>No attendance records found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
