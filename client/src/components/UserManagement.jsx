@@ -58,6 +58,10 @@ function UserManagement() {
     navigate(`/profile/${userId}`);
   };
 
+  const handleViewAttendanceHistory = (userId) => {
+    navigate(`/attendance-history/${userId}`);
+  };
+
   const handleDeleteUser = async (userId, userName) => {
     if (window.confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
       setError('');
@@ -139,6 +143,12 @@ function UserManagement() {
                           className="user-management-view-button"
                         >
                           View Profile
+                        </button>
+                        <button
+                          onClick={() => handleViewAttendanceHistory(user.id)}
+                          className="user-management-attendance-button"
+                        >
+                          Attendance
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user.id, user.name || user.email)}

@@ -5,6 +5,7 @@ import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import UserManagement from './components/UserManagement';
 import UserProfile from './components/UserProfile';
+import AttendanceHistory from './components/AttendanceHistory';
 
 function App() {
   return (
@@ -17,6 +18,8 @@ function App() {
         <Route path="/user-management" element={<UserManagement />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/profile/:userId" element={<UserProfile />} />
+        <Route path="/attendance-history" element={<AttendanceHistory />} />
+        <Route path="/attendance-history/:userId" element={<AttendanceHistory />} />
       </Routes>
     </Router>
   );
