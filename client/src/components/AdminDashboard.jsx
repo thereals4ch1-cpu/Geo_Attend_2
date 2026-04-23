@@ -196,6 +196,18 @@ function AdminDashboard() {
         <h1>Admin Dashboard - Geo-Fence Manager</h1>
         <div>
           <button 
+            onClick={() => navigate('/user-management')} 
+            className="admin-user-management-button"
+          >
+            User Management
+          </button>
+          <button 
+            onClick={() => navigate('/profile')} 
+            className="admin-profile-button"
+          >
+            My Profile
+          </button>
+          <button 
             onClick={() => {
               setShowEmployees(!showEmployees);
               if (!showEmployees) loadEmployees();

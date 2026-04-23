@@ -1,0 +1,242 @@
+.user-management-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px;
+}
+
+.user-management-header {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.user-management-header h1 {
+  margin: 0;
+  color: #333;
+  font-size: 28px;
+}
+
+.user-management-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.user-management-back-button,
+.user-management-logout-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.user-management-back-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.user-management-back-button:hover {
+  background-color: #0056b3;
+}
+
+.user-management-logout-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.user-management-logout-button:hover {
+  background-color: #c82333;
+}
+
+.user-management-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.user-management-success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.user-management-content {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.user-management-loading,
+.user-management-empty {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+.user-management-table-container {
+  overflow-x: auto;
+}
+
+.user-management-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.user-management-table thead {
+  background-color: #f9f9f9;
+  border-bottom: 2px solid #ddd;
+}
+
+.user-management-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+}
+
+.user-management-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  color: #555;
+}
+
+.user-management-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.user-management-role-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.user-management-role-badge.role-admin {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.user-management-role-badge.role-employee {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.user-management-role-badge.role-user {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.user-management-role-select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: white;
+  color: #333;
+}
+
+.user-management-role-select:hover {
+  border-color: #007bff;
+}
+
+.user-management-role-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.user-management-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.user-management-view-button {
+  padding: 6px 15px;
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.user-management-view-button:hover {
+  background-color: #138496;
+}
+
+.user-management-delete-button {
+  padding: 6px 15px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.user-management-delete-button:hover {
+  background-color: #c82333;
+}
+
+@media (max-width: 768px) {
+  .user-management-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-management-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .user-management-back-button,
+  .user-management-logout-button {
+    width: 100%;
+  }
+
+  .user-management-table {
+    font-size: 12px;
+  }
+
+  .user-management-table th,
+  .user-management-table td {
+    padding: 8px;
+  }
+
+  .user-management-actions {
+    flex-direction: column;
+  }
+
+  .user-management-view-button,
+  .user-management-delete-button {
+    width: 100%;
+    padding: 8px 10px;
+  }
+}
