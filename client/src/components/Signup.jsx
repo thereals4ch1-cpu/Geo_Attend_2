@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; //ABC
 import axios from 'axios';
+import '../css/Signup.css';
 
 function Signup() {
   const [name, setName] = useState('');
@@ -32,18 +33,18 @@ function Signup() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.formContainer}>
+    <div className="signup-container">
+      <div className="signup-form-container">
         <h2>Signup for Geo Attend</h2>
-        {error && <div style={styles.error}>{error}</div>}
-        {success && <div style={styles.success}>{success}</div>}
+        {error && <div className="signup-error">{error}</div>}
+        {success && <div className="signup-success">{success}</div>}
         <form onSubmit={handleSignup}>
           <input
             type="text"
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={styles.input}
+            className="signup-input"
             required
           />
           <input
@@ -51,7 +52,7 @@ function Signup() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
+            className="signup-input"
             required
           />
           <input
@@ -59,83 +60,25 @@ function Signup() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
+            className="signup-input"
             required
           />
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            style={styles.select}
+            className="signup-select"
           >
             <option value="employee">Employee</option>
             <option value="admin">Admin</option>
           </select>
-          <button type="submit" style={styles.button}>Signup</button>
+          <button type="submit" className="signup-button">Signup</button>
         </form>
-        <p style={styles.link}>
+        <p className="signup-link">
           Already have an account? <Link to="/">Login here</Link>
         </p>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#f0f0f0'
-  },
-  formContainer: {
-    backgroundColor: 'white',
-    padding: '40px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    width: '300px'
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '16px'
-  },
-  select: {
-    width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '16px'
-  },
-  button: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '16px',
-    cursor: 'pointer',
-    marginTop: '10px'
-  },
-  error: {
-    color: 'red',
-    marginBottom: '10px',
-    textAlign: 'center'
-  },
-  success: {
-    color: 'green',
-    marginBottom: '10px',
-    textAlign: 'center'
-  },
-  link: {
-    marginTop: '20px',
-    textAlign: 'center'
-  }
-};
 
 export default Signup;
