@@ -365,6 +365,12 @@ function EmployeeDashboard() {
             My Profile
           </button>
           <button 
+            onClick={() => navigate('/attendance-history')} 
+            className="employee-attendance-history-button"
+          >
+            Attendance History
+          </button>
+          <button 
             onClick={() => {
               setShowHistory(!showHistory);
               if (!showHistory) loadAttendanceHistory();
