@@ -105,6 +105,9 @@ function Signup() {
         <p className="signup-link">
           Already have an account? <Link to="/">Login here</Link>
         </p>
+        <p className="signup-link">
+          Forgot your password? <Link to="/forgot-password">Reset it here</Link>
+        </p>
       </div>
     </div>
   );

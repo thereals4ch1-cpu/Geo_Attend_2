@@ -3,6 +3,7 @@ import { onMessage } from 'firebase/messaging';
 import { messaging } from './firebase';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import ForgotPassword from './components/ForgotPassword';
 import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import UserManagement from './components/UserManagement';
@@ -27,6 +28,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/employee" element={<EmployeeDashboard />} />
         <Route path="/user-management" element={<UserManagement />} />
