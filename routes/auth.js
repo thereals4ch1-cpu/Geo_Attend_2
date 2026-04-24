@@ -68,4 +68,31 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Google auth helper route: create Firestore user record if not already present
+router.post('/google-signin', async (req, res) => {
+    try {
+        const { uid, name, email, role = 'employee' } = req.body;
+
+        if (!uid || !email) {
+            return res.status(400).json({ error: 'Google user UID and email are required' });
+        }
+
+        const userRef = db.collection('users').doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            await userRef.set({
+                name,
+                email,
+                role,
+                createdAt: new Date()
+            });
+        }
+
+        res.status(200).json({ message: 'Google user stored successfully', uid });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
 module.exports = router;
