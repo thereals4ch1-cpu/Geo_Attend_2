@@ -64,7 +64,7 @@ function Signup() {
   return (
     <div className="signup-container">
       <div className="signup-form-container">
-        <h2>Signup for Geo Attend</h2>
+        <h2>SignUp to Geo Attend</h2>
         {error && <div className="signup-error">{error}</div>}
         {success && <div className="signup-success">{success}</div>}
         <form onSubmit={handleSignup}>
