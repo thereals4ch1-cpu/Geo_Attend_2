@@ -48,7 +48,6 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-right: 10px;
   font-weight: 500;
 }
 
@@ -62,7 +61,6 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-right: 10px;
   font-weight: 500;
 }
 
@@ -327,4 +325,160 @@
 .employee-history-status {
   font-size: 14px;
   font-weight: bold;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .employee-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .employee-header h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  .employee-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .employee-logout-button,
+  .employee-profile-button,
+  .employee-attendance-history-button {
+    padding: 12px;
+    margin-right: 0 !important;
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .employee-content {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .employee-left-panel,
+  .employee-right-panel {
+    width: 100%;
+  }
+
+  .employee-user-info h2 {
+    font-size: 20px;
+  }
+
+  .employee-attendance-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .employee-check-in-button,
+  .employee-check-out-button {
+    padding: 12px;
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .employee-map-container {
+    height: 300px;
+    padding: 15px;
+  }
+
+  .employee-fences-list {
+    padding: 15px;
+    max-height: none;
+  }
+
+  .employee-fence-card {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .employee-history-section {
+    margin: 15px;
+    padding: 15px;
+  }
+
+  .employee-history-card {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .employee-header {
+    padding: 10px;
+  }
+
+  .employee-header h1 {
+    font-size: 20px;
+  }
+
+  .employee-content {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .employee-logout-button,
+  .employee-profile-button,
+  .employee-attendance-history-button {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .employee-user-info {
+    padding: 12px;
+  }
+
+  .employee-user-info h2 {
+    font-size: 18px;
+  }
+
+  .employee-user-info p {
+    font-size: 14px;
+  }
+
+  .employee-attendance-buttons {
+    gap: 8px;
+  }
+
+  .employee-check-in-button,
+  .employee-check-out-button {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .employee-map-container {
+    height: 250px;
+    padding: 10px;
+  }
+
+  .employee-map-legend {
+    flex-direction: column;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .employee-fences-list {
+    padding: 10px;
+  }
+
+  .employee-fence-card {
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+
+  .employee-history-section {
+    margin: 10px;
+    padding: 10px;
+  }
+
+  .employee-history-card {
+    padding: 10px;
+    margin-bottom: 8px;
+  }
 }
