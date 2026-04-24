@@ -48,26 +48,17 @@ function Login() {
         email: user.email || '',
         role: 'employee'
       };
-
-      await axios.post('http://localhost:5000/api/auth/google-signin', {
-        uid: userData.uid,
-        name: userData.name,
-        email: userData.email,
-        role: userData.role
-      });
-
       localStorage.setItem('user', JSON.stringify(userData));
       navigate('/employee');
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Google sign in failed');
+      setError(err.message || 'Google sign in failed');
     }
   };
 
   return (
     <div className="login-container">
       <div className="login-form-container">
-        <h2>Welcome Back</h2>
-        <p>Sign in to your Geo Attend account</p>
+        <h2>Login to Geo Attend</h2>
         {error && <div className="login-error">{error}</div>}
         <form onSubmit={handleLogin}>
           <input
