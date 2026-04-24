@@ -140,54 +140,20 @@ function AdminDashboard() {
     e.preventDefault();
     
     if (!fenceName || !latitude || !longitude || !radius) {
-      alert('PCreateTrip = async (e) => {
-    e.preventDefault();
-
-    if (!selectedUser || !destination || !scheduledDate || !scheduledTime) {
       alert('Please fill in all fields');
       return;
     }
 
     try {
-      const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`);
-      const notificationTime = new Date(scheduledDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
-
-      await addDoc(collection(db, 'scheduledTrips'), {
-        userId: selectedUser,
-        destination,
-        scheduledDateTime: scheduledDateTime.toISOString(),
-        notificationTime: notificationTime.toISOString(),
-        notified: false,
-        createdBy: JSON.parse(localStorage.getItem('user')).name,
-        createdAt: new Date()
-      });
-
-      alert('✅ Trip scheduled successfully!');
-      setSelectedUser('');
-      setDestination('');
-      setScheduledDate('');
-      setScheduledTime('');
-      loadScheduledTrips();
-    } catch (error) {
-      console.error('Error scheduling trip:', error);
-      alert('❌ Error scheduling trip: ' + error.message);
-    }
-  };
-
-  const handleDeleteTrip = async (tripId) => {
-    if (window.confirm('Are you sure you want to delete this scheduled trip?')) {
-      try {
-        await deleteDoc(doc(db, 'scheduledTrips', tripId));
-        alert('✅ Trip deleted successfully!');
-        loadScheduledTrips();
-      } catch (error) {
-        console.error('Error deleting trip:', error);
-        alert('❌ Error deleting trip
+      await addDoc(collection(db, 'geoFences'), {
+        name: fenceName,
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
         radius: parseFloat(radius),
         createdBy: JSON.parse(localStorage.getItem('user')).name,
         createdAt: new Date()
       });
-      
+
       alert('✅ Geo-fence created successfully!');
       setFenceName('');
       setLatitude('');
