@@ -95,11 +95,11 @@ function Signup() {
           <button type="submit" className="signup-button">Signup</button>
         </form>
         <button type="button" className="google-button" onClick={handleGoogleSignup}>
-          <svg className="google-logo" viewBox="0 0 24 24" width="20" height="20">
-            <circle cx="12" cy="12" r="10" fill="#4285f4"/>
-            <circle cx="12" cy="12" r="9" fill="white"/>
-            <path d="M12 5C8.13 5 5 8.13 5 12s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm3.5 8h-2.5v2.5h-2v-2.5H8v-2h2.5V8.5h2v2.5h2.5v2z" fill="#4285f4"/>
-          </svg>
+          <img
+            className="google-logo"
+            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+            alt="Google"
+          />
           Continue with Google
         </button>
         <p className="signup-link">
