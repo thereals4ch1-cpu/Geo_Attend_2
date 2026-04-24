@@ -37,12 +37,15 @@ function AdminDashboard() {
   const [userLocation, setUserLocation] = useState(null);
   const [mapCenter, setMapCenter] = useState([6.9271, 79.8612]);
   const [selectedFence, setSelectedFence] = useState(null);
-  const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
+
+  // Trip scheduling states
+  const [scheduledTrips, setScheduledTrips] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
   const [destination, setDestination] = useState('');
+  const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
-  const [schedules, setSchedules] = useState([]);
-  const navigate = useNavigate();
+  const [users, setUsers] = useState([]);
 
   const loadFences = async () => {
     try {
@@ -71,12 +74,16 @@ function AdminDashboard() {
     }
   };
 
-  const loadSchedules = async () => {
+  const loadScheduledTrips = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/schedules/all');
-      setSchedules(response.data);
+      const querySnapshot = await getDocs(collection(db, 'scheduledTrips'));
+      const tripsData = [];
+      querySnapshot.forEach((doc) => {
+        tripsData.push({ id: doc.id, ...doc.data() });
+      });
+      setScheduledTrips(tripsData);
     } catch (error) {
-      console.error('Error loading schedules:', error);
+      console.error('Error loading scheduled trips:', error);
     }
   };
 
@@ -133,15 +140,49 @@ function AdminDashboard() {
     e.preventDefault();
     
     if (!fenceName || !latitude || !longitude || !radius) {
+      alert('PCreateTrip = async (e) => {
+    e.preventDefault();
+
+    if (!selectedUser || !destination || !scheduledDate || !scheduledTime) {
       alert('Please fill in all fields');
       return;
     }
-    
+
     try {
-      await addDoc(collection(db, 'geoFences'), {
-        name: fenceName,
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+      const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`);
+      const notificationTime = new Date(scheduledDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+
+      await addDoc(collection(db, 'scheduledTrips'), {
+        userId: selectedUser,
+        destination,
+        scheduledDateTime: scheduledDateTime.toISOString(),
+        notificationTime: notificationTime.toISOString(),
+        notified: false,
+        createdBy: JSON.parse(localStorage.getItem('user')).name,
+        createdAt: new Date()
+      });
+
+      alert('✅ Trip scheduled successfully!');
+      setSelectedUser('');
+      setDestination('');
+      setScheduledDate('');
+      setScheduledTime('');
+      loadScheduledTrips();
+    } catch (error) {
+      console.error('Error scheduling trip:', error);
+      alert('❌ Error scheduling trip: ' + error.message);
+    }
+  };
+
+  const handleDeleteTrip = async (tripId) => {
+    if (window.confirm('Are you sure you want to delete this scheduled trip?')) {
+      try {
+        await deleteDoc(doc(db, 'scheduledTrips', tripId));
+        alert('✅ Trip deleted successfully!');
+        loadScheduledTrips();
+      } catch (error) {
+        console.error('Error deleting trip:', error);
+        alert('❌ Error deleting trip
         radius: parseFloat(radius),
         createdBy: JSON.parse(localStorage.getItem('user')).name,
         createdAt: new Date()
@@ -159,29 +200,16 @@ function AdminDashboard() {
     }
   };
 
-  const handleCreateSchedule = async (e) => {
-    e.preventDefault();
-    
-    if (!selectedUser || !destination || !scheduledTime) {
-      alert('Please fill in all fields');
-      return;
-    }
-    
-    try {
-      await axios.post('http://localhost:5000/api/schedules', {
-        employeeId: selectedUser,
-        destination,
-        scheduledTime
-      });
-      
-      alert('✅ Schedule created successfully!');
-      setSelectedUser('');
-      setDestination('');
-      setScheduledTime('');
-      loadSchedules();
-    } catch (error) {
-      console.error('Error creating schedule:', error);
-      alert('❌ Error creating schedule: ' + error.message);
+  const handleDeleteFence = async (fenceId) => {
+    if (window.confirm('Are you sure you want to delete this geo-fence?')) {
+      try {
+        await deleteDoc(doc(db, 'geoFences', fenceId));
+        alert('✅ Geo-fence deleted successfully!');
+        loadFences();
+      } catch (error) {
+        console.error('Error deleting fence:', error);
+        alert('❌ Error deleting geo-fence');
+      }
     }
   };
 
@@ -202,8 +230,6 @@ function AdminDashboard() {
       return;
     }
     loadFences();
-    loadUsers();
-    loadSchedules();
     getCurrentLocation();
   }, [navigate]);
 
@@ -344,54 +370,6 @@ function AdminDashboard() {
             <div><span className="admin-red-circle"></span> Geo-Fence Area</div>
             <div>💡 Click on map to select location</div>
           </div>
-        </div>
-      </div>
-      
-      <div className="admin-schedule-section">
-        <h2>Schedule Destinations</h2>
-        <form onSubmit={handleCreateSchedule}>
-          <select
-            value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
-            className="admin-input"
-            required
-          >
-            <option value="">Select Employee</option>
-            {users.filter(user => user.role === 'employee').map(user => (
-              <option key={user.id} value={user.id}>{user.name} ({user.email})</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="Destination (e.g., Katunayake Airport)"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            className="admin-input"
-            required
-          />
-          <input
-            type="datetime-local"
-            value={scheduledTime}
-            onChange={(e) => setScheduledTime(e.target.value)}
-            className="admin-input"
-            required
-          />
-          <button type="submit" className="admin-create-button">Schedule Trip</button>
-        </form>
-        
-        <div className="admin-schedules-list">
-          <h3>Scheduled Trips</h3>
-          {schedules.length === 0 ? (
-            <p>No schedules yet.</p>
-          ) : (
-            schedules.map(schedule => (
-              <div key={schedule.id} className="admin-schedule-card">
-                <p><strong>Employee:</strong> {users.find(u => u.id === schedule.employeeId)?.name || schedule.employeeId}</p>
-                <p><strong>Destination:</strong> {schedule.destination}</p>
-                <p><strong>Time:</strong> {new Date(schedule.scheduledTime).toLocaleString()}</p>
-              </div>
-            ))
-          )}
         </div>
       </div>
       
