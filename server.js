@@ -24,18 +24,20 @@ app.use('/api/schedules', schedulesRoutes);
 cron.schedule('* * * * *', async () => {
     try {
         const now = new Date();
+        const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
         
-        // Find all upcoming schedules
+        // Find schedules within the next minute that are 1 hour before
         const schedulesSnapshot = await db.collection('schedules')
-            .where('scheduledTime', '>', now)
+            .where('scheduledTime', '>=', now)
+            .where('scheduledTime', '<=', oneHourLater)
             .get();
         
         for (const doc of schedulesSnapshot.docs) {
             const schedule = doc.data();
             const scheduledTime = schedule.scheduledTime.toDate();
-            const timeDiff = (scheduledTime - now) / (1000 * 60); // minutes
+            const diff = (scheduledTime - now) / (1000 * 60); // minutes
             
-            if (timeDiff <= 60 && timeDiff > 59) { // within 1 minute of 1 hour before
+            if (Math.abs(diff - 60) <= 1) { // within 1 minute of 1 hour before
                 // Get user token
                 const tokenDoc = await db.collection('userTokens').doc(schedule.employeeId).get();
                 if (tokenDoc.exists) {
