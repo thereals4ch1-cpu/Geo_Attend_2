@@ -140,6 +140,8 @@ body {
   border-radius: 14px;
   background: var(--surface-soft);
   color: var(--text);
+  caret-color: var(--text);
+  -webkit-text-fill-color: var(--text);
   font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }

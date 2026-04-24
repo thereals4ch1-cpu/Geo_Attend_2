@@ -57,9 +57,16 @@
   padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  color: #333;
+  background-color: #ffffff;
+  color: #111;
   font-size: 14px;
   min-width: 220px;
+  caret-color: #111;
+}
+
+.user-management-search-input::placeholder,
+.user-management-filter-select option {
+  color: #777;
 }
 
 .user-management-search-input:focus,

@@ -92,6 +92,12 @@
   gap: 20px;
 }
 
+.admin-content h2,
+.admin-create-fence h2,
+.admin-schedule-section h2 {
+  color: #111;
+}
+
 .admin-schedule-section {
   background-color: white;
   padding: 20px;
@@ -143,6 +149,14 @@
   border-radius: 4px;
   font-size: 14px;
   box-sizing: border-box;
+  background-color: #fff;
+  color: #111;
+  caret-color: #111;
+  -webkit-text-fill-color: #111;
+}
+
+.admin-input::placeholder {
+  color: #666;
 }
 
 .admin-create-button {
