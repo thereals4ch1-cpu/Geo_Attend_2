@@ -48,10 +48,18 @@ function Login() {
         email: user.email || '',
         role: 'employee'
       };
+
+      await axios.post('http://localhost:5000/api/auth/google-signin', {
+        uid: userData.uid,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role
+      });
+
       localStorage.setItem('user', JSON.stringify(userData));
       navigate('/employee');
     } catch (err) {
-      setError(err.message || 'Google sign in failed');
+      setError(err.response?.data?.error || err.message || 'Google sign in failed');
     }
   };
 
