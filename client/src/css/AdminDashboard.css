@@ -92,11 +92,24 @@
   gap: 20px;
 }
 
-.admin-create-fence {
+.admin-schedule-section {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.admin-schedules-list {
+  margin-top: 20px;
+}
+
+.admin-schedule-card {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  border-left: 4px solid #007bff;
 }
 
 .admin-map-container {

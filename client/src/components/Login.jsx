@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // PQR
 import axios from 'axios';
-import { auth, provider } from '../firebase';
+import { auth, provider, messaging } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
+import { getToken } from 'firebase/messaging';
 import '../css/Login.css';
 
 function Login() {
@@ -24,6 +25,9 @@ function Login() {
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      
+      // Register FCM token
+      await registerFCMToken(user.id || user.uid);
       
       // Redirect based on role
       if (user.role === 'admin') {
@@ -57,9 +61,27 @@ function Login() {
       });
 
       localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Register FCM token
+      await registerFCMToken(userData.uid);
+      
       navigate('/employee');
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Google sign in failed');
+    }
+  const registerFCMToken = async (userId) => {
+    try {
+      // Request permission
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        const token = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY' }); // Need to generate VAPID key
+        await axios.post('http://localhost:5000/api/auth/register-token', {
+          userId,
+          token
+        });
+      }
+    } catch (error) {
+      console.error('Error registering FCM token:', error);
     }
   };
 

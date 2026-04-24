@@ -95,4 +95,20 @@ router.post('/google-signin', async (req, res) => {
     }
 });
 
+// Register FCM token
+router.post('/register-token', async (req, res) => {
+    try {
+        const { userId, token } = req.body;
+        
+        await db.collection('userTokens').doc(userId).set({
+            token,
+            updatedAt: new Date()
+        });
+        
+        res.json({ message: 'Token registered successfully' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
 module.exports = router;
