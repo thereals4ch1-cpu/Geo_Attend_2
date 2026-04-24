@@ -16,6 +16,9 @@ function UserProfile() {
     phone: '',
     department: ''
   });
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const fileInputRef = React.useRef(null);
   const navigate = useNavigate();
   const { userId } = useParams();
   const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -97,6 +100,35 @@ function UserProfile() {
     });
   };
 
+  const handlePhotoSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should be less than 5MB');
+      return;
+    }
+
+    setProfilePhoto(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+    setError('');
+  };
+
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSaveProfile = async () => {
     setError('');
     setSuccess('');
@@ -108,15 +140,23 @@ function UserProfile() {
       }
 
       const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
+      const updateData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         department: formData.department
-      });
+      };
+
+      // If a new photo was selected, add it to the update
+      if (photoPreview && photoPreview !== profile.photoUrl) {
+        updateData.photoUrl = photoPreview;
+      }
+
+      await updateDoc(userRef, updateData);
 
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
+      setProfilePhoto(null);
       loadProfile();
 
       // Update localStorage if it's the current user
@@ -128,6 +168,9 @@ function UserProfile() {
           phone: formData.phone,
           department: formData.department
         };
+        if (photoPreview && photoPreview !== profile.photoUrl) {
+          updatedUser.photoUrl = photoPreview;
+        }
         localStorage.setItem('user', JSON.stringify(updatedUser));
       }
     } catch (err) {
@@ -185,9 +228,51 @@ function UserProfile() {
       <div className="user-profile-content">
         <div className="user-profile-card">
           <div className="user-profile-avatar">
-            <div className="user-profile-avatar-placeholder">
-              {profile.name ? profile.name.charAt(0).toUpperCase() : 'U'}
+            <div 
+              className={`user-profile-avatar-container ${isEditing ? 'editing' : ''}`}
+              onClick={isEditing ? handlePhotoClick : undefined}
+            >
+              {photoPreview || profile.photoUrl ? (
+                <>
+                  <img 
+                    src={photoPreview || profile.photoUrl} 
+                    alt="Profile"
+                    className="user-profile-avatar-image"
+                  />
+                  {isEditing && (
+                    <div className="user-profile-photo-overlay">
+                      <svg className="user-profile-camera-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                      </svg>
+                      <span>Change photo</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="user-profile-avatar-placeholder">
+                    {profile.name ? profile.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  {isEditing && (
+                    <div className="user-profile-photo-overlay">
+                      <svg className="user-profile-camera-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                      </svg>
+                      <span>Add photo</span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoSelect}
+              className="user-profile-file-input"
+            />
           </div>
 
           <div className="user-profile-info">
