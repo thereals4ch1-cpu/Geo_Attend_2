@@ -386,15 +386,6 @@ function EmployeeDashboard() {
           >
             Attendance History
           </button>
-          <button 
-            onClick={() => {
-              setShowHistory(!showHistory);
-              if (!showHistory) loadAttendanceHistory();
-            }} 
-            className="employee-history-button"
-          >
-            {showHistory ? 'Hide History' : 'My Attendance History'}
-          </button>
           <button onClick={handleLogout} className="employee-logout-button">Logout</button>
         </div>
       </div>
