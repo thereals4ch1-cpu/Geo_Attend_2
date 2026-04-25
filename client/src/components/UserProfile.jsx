@@ -21,7 +21,12 @@ function UserProfile() {
   const fileInputRef = React.useRef(null);
   const navigate = useNavigate();
   const { userId } = useParams();
-  const currentUser = JSON.parse(localStorage.getItem('user'));
+  const currentUser = React.useMemo(
+    () => JSON.parse(localStorage.getItem('user')),
+    []
+  );
+
+  const getUserId = (userData) => userData?.id || userData?.uid || userData?.userId || null;
 
   useEffect(() => {
     if (!currentUser) {
@@ -215,7 +220,7 @@ function UserProfile() {
   };
 
   const goBack = () => {
-    if (currentUser?.role === 'admin' && userId && userId !== currentUser.uid) {
+    if (currentUser?.role === 'admin' && userId && userId !== getUserId(currentUser)) {
       navigate('/user-management');
     } else {
       navigate(currentUser?.role === 'admin' ? '/admin' : '/employee');
