@@ -33,7 +33,7 @@ function AttendanceHistory() {
     setError('');
     try {
       const targetUserId = userId || currentUser.uid;
-      const response = await axios.get(`http://localhost:5000/api/attendance/user/${targetUserId}`);
+      const response = await axios.get(`http://localhost:5000/api/attendance/employee/${targetUserId}`);
       setRecords(response.data || []);
 
       // Set user info from current user or from records
