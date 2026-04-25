@@ -29,6 +29,79 @@
   font-size: 14px;
 }
 
+.attendance-history-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  column-gap: 48px;
+  row-gap: 24px;
+  gap: 24px 48px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+.attendance-history-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.attendance-history-filter-item label {
+  font-size: 13px;
+  color: #222;
+  font-weight: 700;
+}
+
+.attendance-history-filter-heading {
+  grid-column: 1 / -1;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.attendance-history-filter-item input,
+.attendance-history-filter-item select {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #000;
+  color: #fff;
+}
+
+.attendance-history-filter-item input::placeholder,
+.attendance-history-filter-item select::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.attendance-history-filter-item select {
+  appearance: none;
+  background-color: #000;
+}
+
+.attendance-history-filter-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.attendance-history-clear-filters {
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: 1px solid #007bff;
+  background-color: #fff;
+  color: #007bff;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.attendance-history-clear-filters:hover {
+  background-color: #007bff;
+  color: white;
+}
+
 .attendance-history-buttons {
   display: flex;
   gap: 10px;
