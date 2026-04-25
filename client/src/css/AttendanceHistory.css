@@ -121,6 +121,10 @@
   background-color: #f9f9f9;
 }
 
+.attendance-history-table tbody tr.expanded {
+  background-color: #f0f8ff;
+}
+
 .attendance-history-check-in {
   color: #28a745;
   font-weight: 600;
@@ -152,6 +156,100 @@
   color: #856404;
 }
 
+.attendance-history-expand-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #007bff;
+  padding: 0;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.attendance-history-expand-button:hover {
+  color: #0056b3;
+}
+
+.attendance-history-details-row {
+  background-color: #f0f8ff;
+}
+
+.attendance-history-details-row td {
+  padding: 0;
+  border-bottom: none;
+}
+
+.attendance-history-details {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  margin: 10px;
+}
+
+.attendance-history-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.details-section {
+  background-color: white;
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 4px solid #007bff;
+}
+
+.details-section h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.detail-item label {
+  font-weight: 600;
+  color: #666;
+  font-size: 12px;
+  min-width: 100px;
+}
+
+.detail-item span {
+  color: #333;
+  font-size: 12px;
+  text-align: right;
+  flex: 1;
+  word-break: break-word;
+}
+
+.details-section:nth-child(1) {
+  border-left-color: #28a745;
+}
+
+.details-section:nth-child(2) {
+  border-left-color: #007bff;
+}
+
+.details-section:nth-child(3) {
+  border-left-color: #6c757d;
+}
+
 @media (max-width: 768px) {
   .attendance-history-header {
     flex-direction: column;
@@ -175,5 +273,27 @@
   .attendance-history-table th,
   .attendance-history-table td {
     padding: 8px;
+  }
+
+  .attendance-history-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-history-details {
+    padding: 15px;
+    margin: 5px;
+  }
+
+  .detail-item {
+    flex-direction: column;
+  }
+
+  .detail-item label {
+    margin-bottom: 5px;
+    min-width: auto;
+  }
+
+  .detail-item span {
+    text-align: left;
   }
 }

@@ -37,12 +37,13 @@ function UserProfile() {
     try {
       if (!userId) {
         // If no userId in params, load current user profile
-        if (currentUser.uid) {
-          const userRef = doc(db, 'users', currentUser.uid);
+        const currentUserId = getUserId(currentUser);
+        if (currentUserId) {
+          const userRef = doc(db, 'users', currentUserId);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const userData = userSnap.data();
-            setProfile({ id: currentUser.uid, ...userData });
+            setProfile({ id: currentUserId, ...userData });
             setFormData({
               name: userData.name || currentUser.name || '',
               email: userData.email || currentUser.email || '',
@@ -50,12 +51,12 @@ function UserProfile() {
               department: userData.department || ''
             });
           } else {
-            setProfile(currentUser);
+            setProfile({ id: currentUserId, ...currentUser });
             setFormData({
               name: currentUser.name || '',
               email: currentUser.email || '',
-              phone: '',
-              department: ''
+              phone: currentUser.phone || '',
+              department: currentUser.department || ''
             });
           }
         } else {
@@ -63,8 +64,8 @@ function UserProfile() {
           setFormData({
             name: currentUser.name || '',
             email: currentUser.email || '',
-            phone: '',
-            department: ''
+            phone: currentUser.phone || '',
+            department: currentUser.department || ''
           });
         }
       } else {
@@ -94,10 +95,32 @@ function UserProfile() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    
+    // Phone validation: only 10 digits, no alphabetical characters
+    if (name === 'phone') {
+      // Remove any non-digit characters
+      const digitsOnly = value.replace(/\D/g, '');
+      // Limit to 10 characters
+      if (digitsOnly.length > 10) {
+        setError('Phone number must be exactly 10 digits');
+        return;
+      }
+      if (digitsOnly !== value && value.length > 0) {
+        setError('Phone number can only contain digits');
+        return;
+      }
+      setError('');
+      setFormData({
+        ...formData,
+        [name]: digitsOnly
+      });
+    } else {
+      setError('');
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
   };
 
   const handlePhotoSelect = (e) => {
@@ -132,8 +155,15 @@ function UserProfile() {
   const handleSaveProfile = async () => {
     setError('');
     setSuccess('');
+    
+    // Validate phone number
+    if (formData.phone && formData.phone.length !== 10) {
+      setError('Phone number must be exactly 10 digits');
+      return;
+    }
+    
     try {
-      const userId = profile?.id || currentUser.uid;
+      const userId = profile?.id || getUserId(currentUser);
       if (!userId) {
         setError('Cannot identify user');
         return;
@@ -160,7 +190,7 @@ function UserProfile() {
       loadProfile();
 
       // Update localStorage if it's the current user
-      if (userId === currentUser.uid) {
+      if (userId === getUserId(currentUser)) {
         const updatedUser = {
           ...currentUser,
           name: formData.name,
@@ -303,7 +333,7 @@ function UserProfile() {
                   </p>
                 </div>
 
-                {(profile.id === currentUser.uid || currentUser.role === 'admin') && (
+                {(profile.id === getUserId(currentUser) || currentUser.role === 'admin') && (
                   <button
                     onClick={() => setIsEditing(true)}
                     className="user-profile-edit-button"
@@ -344,8 +374,13 @@ function UserProfile() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    placeholder="10 digit phone number"
+                    maxLength="10"
                     className="user-profile-input"
                   />
+                  <small className="user-profile-phone-hint">
+                    {formData.phone.length}/10 digits
+                  </small>
                 </div>
                 <div className="user-profile-form-group">
                   <label htmlFor="department">Department:</label>

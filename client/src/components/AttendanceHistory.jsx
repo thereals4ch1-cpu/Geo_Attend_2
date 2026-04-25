@@ -8,6 +8,7 @@ function AttendanceHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userInfo, setUserInfo] = useState(null);
+  const [expandedRecord, setExpandedRecord] = useState(null);
   const navigate = useNavigate();
   const { userId } = useParams();
   const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -106,11 +107,12 @@ function AttendanceHistory() {
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Check In Time</th>
-                  <th>Check Out Time</th>
+                  <th>Check In</th>
+                  <th>Check Out</th>
                   <th>Fence Location</th>
-                  <th>Status</th>
                   <th>Duration</th>
+                  <th>Status</th>
+                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>
@@ -129,35 +131,107 @@ function AttendanceHistory() {
                     }
                   }
 
+                  const isExpanded = expandedRecord === index;
+
                   return (
-                    <tr key={index}>
-                      <td>{record.date}</td>
-                      <td>
-                        {record.checkInTime ? (
-                          <span className="attendance-history-check-in">✅ {record.checkInTime}</span>
-                        ) : (
-                          <span className="attendance-history-not-checked">—</span>
-                        )}
-                      </td>
-                      <td>
-                        {record.checkOutTime ? (
-                          <span className="attendance-history-check-out">✅ {record.checkOutTime}</span>
-                        ) : (
-                          <span className="attendance-history-not-checked">—</span>
-                        )}
-                      </td>
-                      <td>{record.fenceLocation?.name || 'N/A'}</td>
-                      <td>
-                        <span
-                          className={`attendance-history-status ${
-                            record.status === 'completed' ? 'completed' : 'active'
-                          }`}
-                        >
-                          {record.status === 'completed' ? '✅ Completed' : '🟡 Active'}
-                        </span>
-                      </td>
-                      <td>{duration}</td>
-                    </tr>
+                    <React.Fragment key={index}>
+                      <tr className={isExpanded ? 'expanded' : ''}>
+                        <td>{record.date}</td>
+                        <td>
+                          {record.checkInTime ? (
+                            <span className="attendance-history-check-in">✅ {record.checkInTime}</span>
+                          ) : (
+                            <span className="attendance-history-not-checked">—</span>
+                          )}
+                        </td>
+                        <td>
+                          {record.checkOutTime ? (
+                            <span className="attendance-history-check-out">✅ {record.checkOutTime}</span>
+                          ) : (
+                            <span className="attendance-history-not-checked">—</span>
+                          )}
+                        </td>
+                        <td>{record.fenceLocation?.name || 'N/A'}</td>
+                        <td>{duration}</td>
+                        <td>
+                          <span
+                            className={`attendance-history-status ${
+                              record.status === 'completed' ? 'completed' : 'active'
+                            }`}
+                          >
+                            {record.status === 'completed' ? '✅ Completed' : '🟡 Active'}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="attendance-history-expand-button"
+                            onClick={() => setExpandedRecord(isExpanded ? null : index)}
+                            title="View location details"
+                          >
+                            {isExpanded ? '▼' : '▶'}
+                          </button>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr className="attendance-history-details-row">
+                          <td colSpan="7">
+                            <div className="attendance-history-details">
+                              <div className="attendance-history-details-grid">
+                                <div className="details-section">
+                                  <h4>Check-In Details</h4>
+                                  <div className="detail-item">
+                                    <label>Time:</label>
+                                    <span>{record.checkInTime || 'N/A'}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <label>Location:</label>
+                                    <span>{record.checkInLocation?.lat?.toFixed(6) || 'N/A'}, {record.checkInLocation?.lng?.toFixed(6) || 'N/A'}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <label>Accuracy:</label>
+                                    <span>±{record.checkInLocation?.accuracy?.toFixed(1) || 'N/A'}m</span>
+                                  </div>
+                                </div>
+                                <div className="details-section">
+                                  <h4>Check-Out Details</h4>
+                                  <div className="detail-item">
+                                    <label>Time:</label>
+                                    <span>{record.checkOutTime || 'N/A'}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <label>Location:</label>
+                                    <span>{record.checkOutLocation?.lat?.toFixed(6) || 'N/A'}, {record.checkOutLocation?.lng?.toFixed(6) || 'N/A'}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <label>Accuracy:</label>
+                                    <span>±{record.checkOutLocation?.accuracy?.toFixed(1) || 'N/A'}m</span>
+                                  </div>
+                                </div>
+                                <div className="details-section">
+                                  <h4>Geo-Fence Information</h4>
+                                  <div className="detail-item">
+                                    <label>Fence Name:</label>
+                                    <span>{record.fenceLocation?.name || 'N/A'}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <label>Fence Location:</label>
+                                    <span>{record.fenceLocation?.lat?.toFixed(6) || 'N/A'}, {record.fenceLocation?.lng?.toFixed(6) || 'N/A'}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <label>Fence Radius:</label>
+                                    <span>{record.fenceLocation?.radius || 'N/A'}m</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <label>Distance from Center:</label>
+                                    <span>{record.fenceLocation?.distance?.toFixed(2) || 'N/A'}m</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </tbody>
