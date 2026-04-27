@@ -12,7 +12,6 @@ function AttendanceHistory() {
   const [userInfo, setUserInfo] = useState(null);
   
   const [expandedRecord, setExpandedRecord] = useState(null);
-  const [filterDate, setFilterDate] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
   const [locationOptions, setLocationOptions] = useState([]);
   
@@ -140,9 +139,6 @@ function AttendanceHistory() {
       if (startDate && record.date < startDate) return false;
       if (endDate && record.date > endDate) return false;
       
-      if (filterDate && record.date !== filterDate) {
-        return false;
-      }
       if (filterLocation && record.fenceLocation?.name !== filterLocation) {
         return false;
       }
@@ -180,7 +176,7 @@ function AttendanceHistory() {
       }
       return b.date.localeCompare(a.date);
     });
-  }, [records, filterDate, filterLocation, employeeFilter, startDate, endDate, isAdmin]);
+  }, [records, filterLocation, employeeFilter, startDate, endDate, isAdmin]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -268,7 +264,6 @@ function AttendanceHistory() {
     setEmployeeFilter('');
     setStartDate('');
     setEndDate('');
-    setFilterDate('');
     setFilterLocation('');
   };
 
@@ -336,16 +331,6 @@ function AttendanceHistory() {
         </div>
 
         <div className="attendance-history-filter-row" style={{ marginTop: '10px' }}>
-          <div className="attendance-history-filter-group">
-            <label htmlFor="filter-date">Exact Date:</label>
-            <input
-              type="date"
-              id="filter-date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="attendance-history-filter-input"
-            />
-          </div>
           <div className="attendance-history-filter-group">
             <label htmlFor="filter-location">Location:</label>
             <select
