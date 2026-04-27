@@ -12,6 +12,8 @@ function AttendanceHistory() {
   const [employeeFilter, setEmployeeFilter] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [recordsPerPage] = useState(10);
   const navigate = useNavigate();
   const { userId } = useParams();
   const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -52,6 +54,7 @@ function AttendanceHistory() {
     }
 
     setFilteredRecords(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [records, employeeFilter, startDate, endDate, isAdmin]);
 
   const loadAttendanceHistory = async () => {
@@ -179,6 +182,35 @@ function AttendanceHistory() {
     setEndDate('');
   };
 
+  // Get current page records
+  const getCurrentPageRecords = () => {
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    return filteredRecords.slice(startIndex, endIndex);
+  };
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Handle previous page
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Handle next page
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className="attendance-history-container">
       <div className="attendance-history-header">
@@ -248,7 +280,7 @@ function AttendanceHistory() {
           </div>
         </div>
         <div className="attendance-history-filter-info">
-          Showing {filteredRecords.length} of {records.length} records
+          Showing {getCurrentPageRecords().length} of {filteredRecords.length} records (Page {currentPage} of {totalPages})
         </div>
       </div>
 
@@ -274,7 +306,7 @@ function AttendanceHistory() {
                 </tr>
               </thead>
               <tbody>
-                {filteredRecords.map((record, index) => {
+                {getCurrentPageRecords().map((record, index) => {
                   let duration = 'N/A';
                   if (record.checkInTime && record.checkOutTime) {
                     try {
@@ -328,6 +360,41 @@ function AttendanceHistory() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="attendance-history-pagination">
+            <button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="attendance-history-pagination-button"
+            >
+              Previous
+            </button>
+
+            <div className="attendance-history-pagination-pages">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`attendance-history-pagination-page ${
+                    currentPage === page ? 'active' : ''
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="attendance-history-pagination-button"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
