@@ -136,6 +136,15 @@
   background-color: #c82333;
 }
 
+.attendance-history-download-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.attendance-history-download-button:hover {
+  background-color: #218838;
+}
+
 .attendance-history-error {
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
@@ -144,6 +153,69 @@
   border-radius: 4px;
   margin-bottom: 20px;
   text-align: center;
+}
+
+.attendance-history-filters {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.attendance-history-filter-row {
+  display: flex;
+  gap: 20px;
+  align-items: end;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.attendance-history-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.attendance-history-filter-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.attendance-history-filter-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+.attendance-history-filter-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.attendance-history-clear-button {
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.attendance-history-clear-button:hover {
+  background-color: #5a6268;
+}
+
+.attendance-history-filter-info {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
 }
 
 .attendance-history-content {
@@ -229,6 +301,7 @@
   color: #856404;
 }
 
+<<<<<<< HEAD
 .attendance-history-expand-button {
   background: none;
   border: none;
@@ -321,6 +394,13 @@
 
 .details-section:nth-child(3) {
   border-left-color: #6c757d;
+=======
+.attendance-history-employee-email {
+  font-size: 11px;
+  color: #999;
+  font-weight: normal;
+  margin-top: 2px;
+>>>>>>> f4d9c0ac6879ef4313b9c5db9074014e12905843
 }
 
 @media (max-width: 768px) {
@@ -335,8 +415,28 @@
   }
 
   .attendance-history-back-button,
-  .attendance-history-logout-button {
+  .attendance-history-logout-button,
+  .attendance-history-download-button {
     width: 100%;
+  }
+
+  .attendance-history-filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .attendance-history-filter-group {
+    width: 100%;
+  }
+
+  .attendance-history-filter-input {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .attendance-history-clear-button {
+    width: 100%;
+    margin-top: 10px;
   }
 
   .attendance-history-table {

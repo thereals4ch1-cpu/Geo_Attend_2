@@ -211,6 +211,12 @@ function AdminDashboard() {
             User Management
           </button>
           <button 
+            onClick={() => navigate('/attendance-history')} 
+            className="admin-attendance-button"
+          >
+            Attendance History
+          </button>
+          <button 
             onClick={() => navigate('/profile')} 
             className="admin-profile-button"
           >

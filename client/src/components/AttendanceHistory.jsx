@@ -10,13 +10,20 @@ function AttendanceHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userInfo, setUserInfo] = useState(null);
+  
   const [expandedRecord, setExpandedRecord] = useState(null);
   const [filterDate, setFilterDate] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
   const [locationOptions, setLocationOptions] = useState([]);
+  
+  const [employeeFilter, setEmployeeFilter] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
   const navigate = useNavigate();
   const { userId } = useParams();
   const currentUser = JSON.parse(localStorage.getItem('user'));
+  const isAdmin = currentUser?.role === 'admin';
 
   const getUserId = (user) => user?.uid || user?.id || user?.userId || null;
 
@@ -53,14 +60,14 @@ function AttendanceHistory() {
     const currentUserId = getUserId(currentUser);
 
     // If viewing another user's attendance, must be admin
-    if (userId && userId !== currentUserId && currentUser.role !== 'admin') {
+    if (userId && userId !== currentUserId && !isAdmin) {
       navigate('/');
       return;
     }
 
     loadAttendanceHistory();
     loadLocationOptions();
-  }, [userId, navigate]);
+  }, [userId, navigate, isAdmin]);
 
   const loadLocationOptions = async () => {
     try {
@@ -83,12 +90,18 @@ function AttendanceHistory() {
     setError('');
     try {
       const targetUserId = userId || getUserId(currentUser);
-      const response = await axios.get(`http://localhost:5000/api/attendance/employee/${targetUserId}`);
+      const url = isAdmin && !userId
+        ? 'http://localhost:5000/api/attendance/all'
+        : `http://localhost:5000/api/attendance/user/${targetUserId}`;
+      const response = await axios.get(url);
       setRecords(response.data || []);
 
-      // Set user info from current user or from records
-      if (userId && userId !== getUserId(currentUser)) {
-        // Admin viewing another user - try to get from records
+      if (isAdmin && !userId) {
+        setUserInfo({
+          name: 'All Employees',
+          email: 'All attendance records'
+        });
+      } else if (userId && userId !== getUserId(currentUser)) {
         if (response.data && response.data.length > 0) {
           setUserInfo({
             name: response.data[0].employeeName,
@@ -96,7 +109,6 @@ function AttendanceHistory() {
           });
         }
       } else {
-        // User viewing their own history
         setUserInfo({
           name: currentUser?.name,
           email: currentUser?.email
@@ -116,48 +128,59 @@ function AttendanceHistory() {
 
   const filteredRecords = useMemo(() => {
     const searchTerm = filterLocation.trim().toLowerCase();
-    return records
-      .filter((record) => {
-        if (filterDate && record.date !== filterDate) {
+    
+    let filtered = records.filter((record) => {
+      if (isAdmin && employeeFilter) {
+        if (!record.employeeName?.toLowerCase().includes(employeeFilter.toLowerCase()) &&
+            !record.employeeEmail?.toLowerCase().includes(employeeFilter.toLowerCase())) {
           return false;
         }
-        if (filterLocation && record.fenceLocation?.name !== filterLocation) {
-          return false;
-        }
+      }
 
-        if (!searchTerm) {
-          return true;
-        }
+      if (startDate && record.date < startDate) return false;
+      if (endDate && record.date > endDate) return false;
+      
+      if (filterDate && record.date !== filterDate) {
+        return false;
+      }
+      if (filterLocation && record.fenceLocation?.name !== filterLocation) {
+        return false;
+      }
 
-        const fenceName = record.fenceLocation?.name?.toLowerCase() || '';
-        const checkInLoc = record.checkInLocation?.name?.toLowerCase?.() || '';
-        const checkOutLoc = record.checkOutLocation?.name?.toLowerCase?.() || '';
-        const coords = `${record.checkInLocation?.lat || ''} ${record.checkInLocation?.lng || ''} ${record.checkOutLocation?.lat || ''} ${record.checkOutLocation?.lng || ''}`;
+      if (!searchTerm) {
+        return true;
+      }
 
-        return (
-          fenceName.includes(searchTerm) ||
-          checkInLoc.includes(searchTerm) ||
-          checkOutLoc.includes(searchTerm) ||
-          coords.includes(searchTerm)
-        );
-      })
-      .sort((a, b) => {
-        if (a.date === b.date) {
-          const aTime = a.checkInTimestamp
-            ? a.checkInTimestamp.toDate
-              ? a.checkInTimestamp.toDate()
-              : new Date(a.checkInTimestamp)
-            : new Date(0);
-          const bTime = b.checkInTimestamp
-            ? b.checkInTimestamp.toDate
-              ? b.checkInTimestamp.toDate()
-              : new Date(b.checkInTimestamp)
-            : new Date(0);
-          return bTime - aTime;
-        }
-        return b.date.localeCompare(a.date);
-      });
-  }, [records, filterDate, filterLocation]);
+      const fenceName = record.fenceLocation?.name?.toLowerCase() || '';
+      const checkInLoc = record.checkInLocation?.name?.toLowerCase?.() || '';
+      const checkOutLoc = record.checkOutLocation?.name?.toLowerCase?.() || '';
+      const coords = `${record.checkInLocation?.lat || ''} ${record.checkInLocation?.lng || ''} ${record.checkOutLocation?.lat || ''} ${record.checkOutLocation?.lng || ''}`;
+
+      return (
+        fenceName.includes(searchTerm) ||
+        checkInLoc.includes(searchTerm) ||
+        checkOutLoc.includes(searchTerm) ||
+        coords.includes(searchTerm)
+      );
+    });
+    
+    return filtered.sort((a, b) => {
+      if (a.date === b.date) {
+        const aTime = a.checkInTimestamp
+          ? a.checkInTimestamp.toDate
+            ? a.checkInTimestamp.toDate()
+            : new Date(a.checkInTimestamp)
+          : new Date(0);
+        const bTime = b.checkInTimestamp
+          ? b.checkInTimestamp.toDate
+            ? b.checkInTimestamp.toDate()
+            : new Date(b.checkInTimestamp)
+          : new Date(0);
+        return bTime - aTime;
+      }
+      return b.date.localeCompare(a.date);
+    });
+  }, [records, filterDate, filterLocation, employeeFilter, startDate, endDate, isAdmin]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -172,6 +195,83 @@ function AttendanceHistory() {
     }
   };
 
+  const downloadCSV = () => {
+    if (filteredRecords.length === 0) {
+      alert('No records to download');
+      return;
+    }
+
+    const headers = isAdmin 
+      ? ['Employee Name', 'Employee Email', 'Date', 'Check In Time', 'Check Out Time', 'Fence Location', 'Status', 'Duration']
+      : ['Date', 'Check In Time', 'Check Out Time', 'Fence Location', 'Status', 'Duration'];
+
+    const csvContent = [
+      headers.join(','),
+      ...filteredRecords.map((record) => {
+        let duration = 'N/A';
+        if (record.checkInTime && record.checkOutTime) {
+          try {
+            const checkIn = new Date(`${record.date}T${record.checkInTime}`);
+            const checkOut = new Date(`${record.date}T${record.checkOutTime}`);
+            const diffMs = checkOut - checkIn;
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            duration = `${hours}h ${minutes}m`;
+          } catch (e) {
+            duration = 'N/A';
+          }
+        }
+
+        const status = record.status === 'completed' ? 'Completed' : 'Active';
+        
+        if (isAdmin) {
+          return [
+            `"${record.employeeName || 'Unknown'}"`,
+            `"${record.employeeEmail || 'N/A'}"`,
+            record.date,
+            record.checkInTime || 'N/A',
+            record.checkOutTime || 'N/A',
+            `"${record.fenceLocation?.name || 'N/A'}"`,
+            status,
+            duration
+          ].join(',');
+        } else {
+          return [
+            record.date,
+            record.checkInTime || 'N/A',
+            record.checkOutTime || 'N/A',
+            `"${record.fenceLocation?.name || 'N/A'}"`,
+            status,
+            duration
+          ].join(',');
+        }
+      })
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    const fileName = isAdmin && !userId 
+      ? `All_Attendance_${new Date().toISOString().split('T')[0]}.csv`
+      : `Attendance_${userInfo?.name || 'History'}_${new Date().toISOString().split('T')[0]}.csv`;
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const clearFilters = () => {
+    setEmployeeFilter('');
+    setStartDate('');
+    setEndDate('');
+    setFilterDate('');
+    setFilterLocation('');
+  };
+
   return (
     <div className="attendance-history-container">
       <div className="attendance-history-header">
@@ -184,6 +284,9 @@ function AttendanceHistory() {
           )}
         </div>
         <div className="attendance-history-buttons">
+          <button onClick={downloadCSV} className="attendance-history-download-button">
+            ⬇ Download CSV
+          </button>
           <button onClick={goBack} className="attendance-history-back-button">
             Back
           </button>
@@ -195,40 +298,79 @@ function AttendanceHistory() {
 
       <div className="attendance-history-filters">
         <div className="attendance-history-filter-heading">Filter attendance records</div>
-        <div className="attendance-history-filter-item">
-          <label htmlFor="filter-date">Date</label>
-          <input
-            type="date"
-            id="filter-date"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-          />
+        
+        <div className="attendance-history-filter-row">
+          {isAdmin && (
+            <div className="attendance-history-filter-group">
+              <label htmlFor="employee-filter">Employee:</label>
+              <input
+                id="employee-filter"
+                type="text"
+                placeholder="Search by name or email"
+                value={employeeFilter}
+                onChange={(e) => setEmployeeFilter(e.target.value)}
+                className="attendance-history-filter-input"
+              />
+            </div>
+          )}
+          <div className="attendance-history-filter-group">
+            <label htmlFor="start-date">Start Date:</label>
+            <input
+              id="start-date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="attendance-history-filter-input"
+            />
+          </div>
+          <div className="attendance-history-filter-group">
+            <label htmlFor="end-date">End Date:</label>
+            <input
+              id="end-date"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="attendance-history-filter-input"
+            />
+          </div>
         </div>
-        <div className="attendance-history-filter-item">
-          <label htmlFor="filter-location">Location</label>
-          <select
-            id="filter-location"
-            value={filterLocation}
-            onChange={(e) => setFilterLocation(e.target.value)}
-          >
-            <option value="">All locations</option>
-            {uniqueLocations.map((locationName) => (
-              <option key={locationName} value={locationName}>
-                {locationName}
-              </option>
-            ))}
-          </select>
+
+        <div className="attendance-history-filter-row" style={{ marginTop: '10px' }}>
+          <div className="attendance-history-filter-group">
+            <label htmlFor="filter-date">Exact Date:</label>
+            <input
+              type="date"
+              id="filter-date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="attendance-history-filter-input"
+            />
+          </div>
+          <div className="attendance-history-filter-group">
+            <label htmlFor="filter-location">Location:</label>
+            <select
+              id="filter-location"
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+              className="attendance-history-filter-input"
+            >
+              <option value="">All locations</option>
+              {uniqueLocations.map((locationName) => (
+                <option key={locationName} value={locationName}>
+                  {locationName}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="attendance-history-filter-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <button onClick={clearFilters} className="attendance-history-clear-button">
+              Clear Filters
+            </button>
+          </div>
         </div>
-        <div className="attendance-history-filter-actions">
-          <button
-            className="attendance-history-clear-filters"
-            onClick={() => {
-              setFilterDate('');
-              setFilterLocation('');
-            }}
-          >
-            Clear Filters
-          </button>
+        
+        <div className="attendance-history-filter-info" style={{ marginTop: '10px' }}>
+          Showing {filteredRecords.length} of {records.length} records
         </div>
       </div>
 
@@ -238,12 +380,15 @@ function AttendanceHistory() {
         {loading ? (
           <div className="attendance-history-loading">Loading attendance records...</div>
         ) : filteredRecords.length === 0 ? (
-          <div className="attendance-history-empty">No attendance records found</div>
+          <div className="attendance-history-empty">
+            {records.length === 0 ? 'No attendance records found' : 'No records match your filters'}
+          </div>
         ) : (
           <div className="attendance-history-table-container">
             <table className="attendance-history-table">
               <thead>
                 <tr>
+                  {isAdmin && <th>Employee</th>}
                   <th>Date</th>
                   <th>Check In</th>
                   <th>Check Out</th>
@@ -272,6 +417,12 @@ function AttendanceHistory() {
                   return (
                     <React.Fragment key={record.id || index}>
                       <tr className={isExpanded ? 'expanded' : ''}>
+                        {isAdmin && (
+                          <td>
+                            {record.employeeName ? record.employeeName : 'Unknown'}
+                            {record.employeeEmail ? <div className="attendance-history-employee-email" style={{fontSize: '0.8em', color: '#666'}}>{record.employeeEmail}</div> : null}
+                          </td>
+                        )}
                         <td>{record.date}</td>
                         <td>
                           {record.checkInTime ? (
@@ -310,7 +461,7 @@ function AttendanceHistory() {
                       </tr>
                       {isExpanded && (
                         <tr className="attendance-history-details-row">
-                          <td colSpan="7">
+                          <td colSpan={isAdmin ? "8" : "7"}>
                             <div className="attendance-history-details">
                               <div className="attendance-history-details-grid">
                                 <div className="details-section">
