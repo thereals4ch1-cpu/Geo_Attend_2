@@ -39,7 +39,7 @@ function AttendanceHistory() {
 
     // Filter by employee (admin only)
     if (isAdmin && employeeFilter) {
-      filtered = filtered.filter(record => 
+      filtered = filtered.filter(record =>
         record.employeeName?.toLowerCase().includes(employeeFilter.toLowerCase()) ||
         record.employeeEmail?.toLowerCase().includes(employeeFilter.toLowerCase())
       );
@@ -113,29 +113,15 @@ function AttendanceHistory() {
       return;
     }
 
-    const headers = isAdmin 
-      ? ['Employee Name', 'Employee Email', 'Date', 'Check In Time', 'Check Out Time', 'Fence Location', 'Status', 'Duration']
-      : ['Date', 'Check In Time', 'Check Out Time', 'Fence Location', 'Status', 'Duration'];
+    const headers = isAdmin
+      ? ['Employee Name', 'Employee Email', 'Date', 'Check In Time', 'Check Out Time', 'Fence Location', 'Status']
+      : ['Date', 'Check In Time', 'Check Out Time', 'Fence Location', 'Status'];
 
     const csvContent = [
       headers.join(','),
       ...filteredRecords.map((record) => {
-        let duration = 'N/A';
-        if (record.checkInTime && record.checkOutTime) {
-          try {
-            const checkIn = new Date(`${record.date}T${record.checkInTime}`);
-            const checkOut = new Date(`${record.date}T${record.checkOutTime}`);
-            const diffMs = checkOut - checkIn;
-            const hours = Math.floor(diffMs / (1000 * 60 * 60));
-            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            duration = `${hours}h ${minutes}m`;
-          } catch (e) {
-            duration = 'N/A';
-          }
-        }
-
         const status = record.status === 'completed' ? 'Completed' : 'Active';
-        
+
         if (isAdmin) {
           return [
             `"${record.employeeName || 'Unknown'}"`,
@@ -144,8 +130,7 @@ function AttendanceHistory() {
             record.checkInTime || 'N/A',
             record.checkOutTime || 'N/A',
             `"${record.fenceLocation?.name || 'N/A'}"`,
-            status,
-            duration
+            status
           ].join(',');
         } else {
           return [
@@ -153,8 +138,7 @@ function AttendanceHistory() {
             record.checkInTime || 'N/A',
             record.checkOutTime || 'N/A',
             `"${record.fenceLocation?.name || 'N/A'}"`,
-            status,
-            duration
+            status
           ].join(',');
         }
       })
@@ -163,11 +147,11 @@ function AttendanceHistory() {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
-    const fileName = isAdmin && !userId 
+
+    const fileName = isAdmin && !userId
       ? `All_Attendance_${new Date().toISOString().split('T')[0]}.csv`
       : `Attendance_${userInfo?.name || 'History'}_${new Date().toISOString().split('T')[0]}.csv`;
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', fileName);
     link.style.visibility = 'hidden';
@@ -302,25 +286,10 @@ function AttendanceHistory() {
                   <th>Check Out Time</th>
                   <th>Fence Location</th>
                   <th>Status</th>
-                  <th>Duration</th>
                 </tr>
               </thead>
               <tbody>
                 {getCurrentPageRecords().map((record, index) => {
-                  let duration = 'N/A';
-                  if (record.checkInTime && record.checkOutTime) {
-                    try {
-                      const checkIn = new Date(`${record.date}T${record.checkInTime}`);
-                      const checkOut = new Date(`${record.date}T${record.checkOutTime}`);
-                      const diffMs = checkOut - checkIn;
-                      const hours = Math.floor(diffMs / (1000 * 60 * 60));
-                      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                      duration = `${hours}h ${minutes}m`;
-                    } catch (e) {
-                      duration = 'N/A';
-                    }
-                  }
-
                   return (
                     <tr key={index}>
                       {isAdmin && (
@@ -347,14 +316,12 @@ function AttendanceHistory() {
                       <td>{record.fenceLocation?.name || 'N/A'}</td>
                       <td>
                         <span
-                          className={`attendance-history-status ${
-                            record.status === 'completed' ? 'completed' : 'active'
-                          }`}
+                          className={`attendance-history-status ${record.status === 'completed' ? 'completed' : 'active'
+                            }`}
                         >
                           {record.status === 'completed' ? '✅ Completed' : '🟡 Active'}
                         </span>
                       </td>
-                      <td>{duration}</td>
                     </tr>
                   );
                 })}
@@ -379,9 +346,8 @@ function AttendanceHistory() {
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`attendance-history-pagination-page ${
-                    currentPage === page ? 'active' : ''
-                  }`}
+                  className={`attendance-history-pagination-page ${currentPage === page ? 'active' : ''
+                    }`}
                 >
                   {page}
                 </button>

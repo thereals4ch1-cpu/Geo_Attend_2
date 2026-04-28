@@ -254,6 +254,14 @@
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
+.user-profile-phone-hint {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
 .user-profile-edit-button {
   margin-top: 20px;
   padding: 10px 20px;
