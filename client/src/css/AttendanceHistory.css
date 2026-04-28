@@ -231,6 +231,69 @@
   margin-top: 2px;
 }
 
+.attendance-history-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 20px 0;
+  border-top: 1px solid #ddd;
+}
+
+.attendance-history-pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.attendance-history-pagination-button:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.attendance-history-pagination-button:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  border-color: #dee2e6;
+}
+
+.attendance-history-pagination-pages {
+  display: flex;
+  gap: 5px;
+}
+
+.attendance-history-pagination-page {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, border-color 0.3s;
+  min-width: 40px;
+}
+
+.attendance-history-pagination-page:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+}
+
+.attendance-history-pagination-page.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
 @media (max-width: 768px) {
   .attendance-history-header {
     flex-direction: column;
@@ -274,5 +337,21 @@
   .attendance-history-table th,
   .attendance-history-table td {
     padding: 8px;
+  }
+
+  .attendance-history-pagination {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .attendance-history-pagination-pages {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .attendance-history-pagination-button,
+  .attendance-history-pagination-page {
+    padding: 6px 10px;
+    font-size: 12px;
   }
 }
