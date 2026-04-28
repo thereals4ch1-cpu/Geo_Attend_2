@@ -1,6 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { onMessage } from 'firebase/messaging';
-import { messaging } from './firebase';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import ForgotPassword from './components/ForgotPassword';
@@ -11,18 +9,6 @@ import UserProfile from './components/UserProfile';
 import AttendanceHistory from './components/AttendanceHistory';
 
 function App() {
-  // Listen for FCM messages
-  onMessage(messaging, (payload) => {
-    console.log('Message received. ', payload);
-    // Show notification
-    if (Notification.permission === 'granted') {
-      new Notification(payload.notification.title, {
-        body: payload.notification.body,
-        icon: '/vite.svg' // or your icon
-      });
-    }
-  });
-
   return (
     <Router>
       <Routes>
