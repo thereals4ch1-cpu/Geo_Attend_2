@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'; //ABC
 import axios from 'axios';
 import { auth, provider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
+import { API_BASE_URL } from '../config';
 import '../css/Signup.css';
 
 function Signup() {
@@ -19,7 +20,7 @@ function Signup() {
     setSuccess('');
     
     try {
-      await axios.post('http://localhost:5000/api/auth/signup', {
+      await axios.post(`${API_BASE_URL}/api/auth/signup`, {
         name,
         email,
         password,
@@ -46,7 +47,7 @@ function Signup() {
         role: 'employee'
       };
 
-      await axios.post('http://localhost:5000/api/auth/google-signin', {
+      await axios.post(`${API_BASE_URL}/api/auth/google-signin`, {
         uid: userData.uid,
         name: userData.name,
         email: userData.email,

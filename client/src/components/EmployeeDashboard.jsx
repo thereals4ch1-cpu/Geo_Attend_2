@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Circle, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import '../css/EmployeeDashboard.css';
 
 // Fix for default marker icons
@@ -135,7 +136,7 @@ function EmployeeDashboard() {
       if (!userId) {
         throw new Error('Missing user ID in localStorage');
       }
-      const response = await axios.get(`http://localhost:5000/api/attendance/employee/${userId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/attendance/employee/${userId}`);
       setAttendanceHistory(response.data);
       console.log('Loaded history:', response.data);
     } catch (error) {
@@ -355,7 +356,7 @@ function EmployeeDashboard() {
             updatedAt: now
           };
           
-          await axios.post('http://localhost:5000/api/attendance/update', {
+          await axios.post(`${API_BASE_URL}/api/attendance/update`, {
             docId: docRef.id,
             ...updateData
           });
