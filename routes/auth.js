@@ -30,7 +30,7 @@ function authorizeAdmin(req, res, next) {
 // Signup route
 router.post('/signup', authenticateToken, authorizeAdmin, async (req, res) => {
     try {
-        const { email, password, name, role = 'employee' } = req.body;
+        const { email, password, name, role } = req.body;
         
         // Create user in Firebase Auth
         const userRecord = await auth.createUser({
@@ -43,7 +43,7 @@ router.post('/signup', authenticateToken, authorizeAdmin, async (req, res) => {
         await db.collection('users').doc(userRecord.uid).set({
             name,
             email,
-            role,
+            role, // 'admin' or 'employee'
             createdAt: new Date()
         });
         

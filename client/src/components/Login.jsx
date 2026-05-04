@@ -128,9 +128,7 @@ function Login() {
           Location access required for geo-verification
         </p>
 
-        <p className="login-signup">
-          Don't have an account? <Link to="/signup">Signup</Link>
-        </p>
+
       </div>
     </div>
   );
