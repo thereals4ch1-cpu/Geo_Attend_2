@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { auth, provider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
+import { API_BASE_URL } from '../config';
 import '../css/Login.css';
 
 function Login() {
@@ -16,7 +17,7 @@ function Login() {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password
       });
@@ -48,7 +49,7 @@ function Login() {
         role: 'employee'
       };
 
-      await axios.post('http://localhost:5000/api/auth/google-signin', {
+      await axios.post(`${API_BASE_URL}/api/auth/google-signin`, {
         uid: userData.uid,
         name: userData.name,
         email: userData.email,
@@ -127,9 +128,7 @@ function Login() {
           Location access required for geo-verification
         </p>
 
-        <p className="login-signup">
-          Don't have an account? <Link to="/signup">Signup</Link>
-        </p>
+
       </div>
     </div>
   );

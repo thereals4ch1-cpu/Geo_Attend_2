@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, query, where } from 'firebase/firestore';
 import { MapContainer, TileLayer, Marker, Circle, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import '../css/EmployeeDashboard.css';
 
 // Fix for default marker icons
@@ -46,7 +47,6 @@ function EmployeeDashboard() {
   const [message, setMessage] = useState('');
   const [watchId, setWatchId] = useState(null);
   const [mapCenter, setMapCenter] = useState([6.9271, 79.8612]);
-  const [todayAttendance, setTodayAttendance] = useState([]);
   const [attendanceHistory, setAttendanceHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const navigate = useNavigate();
@@ -98,33 +98,16 @@ function EmployeeDashboard() {
       );
       
       const querySnapshot = await getDocs(q);
-      const records = [];
-      querySnapshot.forEach((doc) => {
-        records.push({ id: doc.id, ...doc.data() });
-      });
-
-      records.sort((a, b) => {
-        const aTime = a.checkInTimestamp ? a.checkInTimestamp.toDate ? a.checkInTimestamp.toDate() : new Date(a.checkInTimestamp) : new Date(0);
-        const bTime = b.checkInTimestamp ? b.checkInTimestamp.toDate ? b.checkInTimestamp.toDate() : new Date(b.checkInTimestamp) : new Date(0);
-        return bTime - aTime;
-      });
-
-      setTodayAttendance(records);
-      if (records.length > 0) {
-        const latest = records[0];
+      if (!querySnapshot.empty) {
+        const attendance = querySnapshot.docs[0].data();
         setAttendanceStatus({
-          checkIn: latest.checkInTime,
-          checkOut: latest.checkOutTime || null,
-          location: latest.fenceLocation?.name || latest.checkInLocation?.name || null,
-          recordId: latest.id
+          checkIn: attendance.checkInTime,
+          checkOut: attendance.checkOutTime || null,
+          recordId: querySnapshot.docs[0].id
         });
-      } else {
-        setAttendanceStatus(null);
       }
     } catch (error) {
       console.error('Error checking attendance:', error);
-      setTodayAttendance([]);
-      setAttendanceStatus(null);
     }
   };
 
@@ -135,7 +118,7 @@ function EmployeeDashboard() {
       if (!userId) {
         throw new Error('Missing user ID in localStorage');
       }
-      const response = await axios.get(`http://localhost:5000/api/attendance/employee/${userId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/attendance/employee/${userId}`);
       setAttendanceHistory(response.data);
       console.log('Loaded history:', response.data);
     } catch (error) {
@@ -255,9 +238,9 @@ function EmployeeDashboard() {
       const dateString = now.toLocaleDateString();
 
       if (type === 'in') {
-        if (attendanceStatus?.checkIn && !attendanceStatus?.checkOut) {
-          setMessage(`❌ You must check out from ${attendanceStatus.location || 'your current location'} before checking in again.`);
-          setTimeout(() => setMessage(''), 5000);
+        if (attendanceStatus?.checkIn) {
+          setMessage('❌ You have already checked in today!');
+          setTimeout(() => setMessage(''), 3000);
           return;
         }
         
@@ -292,56 +275,35 @@ function EmployeeDashboard() {
         console.log('Time:', time);
         console.log('Fence:', result.fence.name);
         
-        const newRecord = {
-          id: docRef.id,
-          ...attendanceRecord
-        };
-
-        setTodayAttendance((prev) => [newRecord, ...prev]);
         setAttendanceStatus({ 
           checkIn: time, 
           checkOut: null,
-          location: result.fence.name,
           recordId: docRef.id 
         });
         setMessage(`✅ Check-in successful at ${result.fence.name}! (${result.distance.toFixed(2)}m from center)`);
       } 
       else if (type === 'out') {
-        if (!attendanceStatus?.checkIn || attendanceStatus?.checkOut) {
-          setMessage('❌ You have no active check-in session to check out from.');
+        if (!attendanceStatus?.checkIn) {
+          setMessage('❌ You haven\'t checked in yet!');
           setTimeout(() => setMessage(''), 3000);
           return;
         }
         
-        let docRef = null;
-        if (attendanceStatus?.recordId) {
-          docRef = doc(db, 'attendance', attendanceStatus.recordId);
-        } else {
-          const q = query(
-            collection(db, 'attendance'),
-            where('employeeId', '==', userId),
-            where('date', '==', today)
-          );
-          const querySnapshot = await getDocs(q);
-          const todayRecords = [];
-          querySnapshot.forEach((docItem) => {
-            todayRecords.push({ id: docItem.id, ...docItem.data(), ref: docItem.ref });
-          });
-
-          const activeRecord = todayRecords
-            .sort((a, b) => {
-              const aTime = a.checkInTimestamp ? a.checkInTimestamp.toDate ? a.checkInTimestamp.toDate() : new Date(a.checkInTimestamp) : new Date(0);
-              const bTime = b.checkInTimestamp ? b.checkInTimestamp.toDate ? b.checkInTimestamp.toDate() : new Date(b.checkInTimestamp) : new Date(0);
-              return bTime - aTime;
-            })
-            .find((record) => !record.checkOutTime || record.status !== 'completed');
-
-          if (activeRecord) {
-            docRef = activeRecord.ref;
-          }
+        if (attendanceStatus?.checkOut) {
+          setMessage('❌ You have already checked out today!');
+          setTimeout(() => setMessage(''), 3000);
+          return;
         }
-
-        if (docRef) {
+        
+        const q = query(
+          collection(db, 'attendance'),
+          where('employeeId', '==', userId),
+          where('date', '==', today)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const docRef = querySnapshot.docs[0].ref;
           
           const updateData = {
             checkOutTime: time,
@@ -355,7 +317,7 @@ function EmployeeDashboard() {
             updatedAt: now
           };
           
-          await axios.post('http://localhost:5000/api/attendance/update', {
+          await axios.post(`${API_BASE_URL}/api/attendance/update`, {
             docId: docRef.id,
             ...updateData
           });
@@ -364,11 +326,6 @@ function EmployeeDashboard() {
           console.log('Employee:', userData.name);
           console.log('Time:', time);
           
-          setTodayAttendance((prev) => prev.map((record) =>
-            record.id === docRef.id
-              ? { ...record, ...updateData }
-              : record
-          ));
           setAttendanceStatus({ 
             ...attendanceStatus, 
             checkOut: time 
@@ -430,6 +387,15 @@ function EmployeeDashboard() {
           >
             Attendance History
           </button>
+          <button 
+            onClick={() => {
+              setShowHistory(!showHistory);
+              if (!showHistory) loadAttendanceHistory();
+            }} 
+            className="employee-history-button"
+          >
+            {showHistory ? 'Hide History' : 'My Attendance History'}
+          </button>
           <button onClick={handleLogout} className="employee-logout-button">Logout</button>
         </div>
       </div>
@@ -476,14 +442,14 @@ function EmployeeDashboard() {
           <div className="employee-attendance-buttons">
             <button 
               onClick={() => markAttendance('in')}
-              disabled={attendanceStatus?.checkIn && !attendanceStatus?.checkOut}
+              disabled={attendanceStatus?.checkIn}
               style={{
-                opacity: attendanceStatus?.checkIn && !attendanceStatus?.checkOut ? 0.5 : 1,
-                backgroundColor: insideFence && !(attendanceStatus?.checkIn && !attendanceStatus?.checkOut) ? '#28a745' : '#6c757d'
+                opacity: attendanceStatus?.checkIn ? 0.5 : 1,
+                backgroundColor: insideFence && !attendanceStatus?.checkIn ? '#28a745' : '#6c757d'
               }}
               className="employee-check-in-button"
             >
-              {attendanceStatus?.checkIn && !attendanceStatus?.checkOut ? '✓ Checked In' : 'Check In'}
+              {attendanceStatus?.checkIn ? '✓ Checked In' : 'Check In'}
             </button>
             
             <button 
@@ -499,20 +465,13 @@ function EmployeeDashboard() {
             </button>
           </div>
           
-          <div className="employee-attendance-info">
-            <h3>Today's Attendance</h3>
-            {todayAttendance.length === 0 ? (
-              <p>No attendance recorded today.</p>
-            ) : (
-              todayAttendance.map((record) => (
-                <div key={record.id} className="employee-today-attendance-card">
-                  <p>📍 Location: {record.fenceLocation?.name || record.checkInLocation?.name || 'Unknown'}</p>
-                  <p>🕐 Check-in: {record.checkInTime}</p>
-                  <p>🕐 Check-out: {record.checkOutTime || 'Still checked in'}</p>
-                </div>
-              ))
-            )}
-          </div>
+          {attendanceStatus && (
+            <div className="employee-attendance-info">
+              <h3>Today's Attendance</h3>
+              <p>🕐 Check-in: {attendanceStatus.checkIn || 'Not checked in'}</p>
+              <p>🕐 Check-out: {attendanceStatus.checkOut || 'Not checked out'}</p>
+            </div>
+          )}
         </div>
         
         <div className="employee-right-panel">
