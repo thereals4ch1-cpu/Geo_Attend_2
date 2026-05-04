@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 // Signup route
 router.post('/signup', async (req, res) => {
     try {
-        const { email, password, name, role } = req.body;
+        const { email, password, name, role, phoneNumber } = req.body;
         
         // Create user in Firebase Auth
         const userRecord = await auth.createUser({
@@ -21,6 +21,7 @@ router.post('/signup', async (req, res) => {
             name,
             email,
             role, // 'admin' or 'employee'
+            phoneNumber: phoneNumber || null,
             createdAt: new Date()
         });
         
