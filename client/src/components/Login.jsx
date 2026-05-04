@@ -40,23 +40,16 @@ function Login() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      const userData = {
-        id: user.uid,
-        uid: user.uid,
-        name: user.displayName || '',
-        email: user.email || '',
-        role: 'employee'
-      };
 
-      await axios.post('http://localhost:5000/api/auth/google-signin', {
-        uid: userData.uid,
-        name: userData.name,
-        email: userData.email,
-        role: userData.role
+      const response = await axios.post('http://localhost:5000/api/auth/google-signin', {
+        uid: user.uid,
+        email: user.email
       });
 
+      const { token, user: userData } = response.data;
+      localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
-      navigate('/employee');
+      navigate(userData.role === 'admin' ? '/admin' : '/employee');
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Google sign in failed');
     }
@@ -125,10 +118,6 @@ function Login() {
 
         <p className="login-note">
           Location access required for geo-verification
-        </p>
-
-        <p className="login-signup">
-          Don't have an account? <Link to="/signup">Signup</Link>
         </p>
       </div>
     </div>
