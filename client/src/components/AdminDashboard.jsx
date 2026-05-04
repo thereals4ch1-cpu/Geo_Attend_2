@@ -202,33 +202,33 @@ function AdminDashboard() {
   return (
     <div className="admin-container">
       <div className="admin-header">
-        <h1>Admin Dashboard - Geo-Fence Manager</h1>
+        <h1>📍 Geo-Fence Manager</h1>
         <div>
           <button 
             onClick={() => navigate('/user-management')} 
             className="admin-user-management-button"
           >
-            User Management
+            👥 User Management
           </button>
           <button 
             onClick={() => navigate('/attendance-history')} 
             className="admin-attendance-button"
           >
-            Attendance History
+            📊 Attendance History
           </button>
           <button 
             onClick={() => navigate('/profile')} 
             className="admin-profile-button"
           >
-            My Profile
+            👤 My Profile
           </button>
-              <button onClick={handleLogout} className="admin-logout-button">Logout</button>
+          <button onClick={handleLogout} className="admin-logout-button">🚪 Logout</button>
         </div>
       </div>
       
       <div className="admin-content">
         <div className="admin-create-fence">
-          <h2>Create Geo-Fence</h2>
+          <h2>🗺️ Create New Geo-Fence</h2>
           <form onSubmit={handleCreateFence}>
             <input
               type="text"
@@ -267,19 +267,19 @@ function AdminDashboard() {
             <button type="button" onClick={useCurrentLocation} className="admin-use-location-button">
               📍 Use My Current Location
             </button>
-            <button type="submit" className="admin-create-button">Create Geo-Fence</button>
+            <button type="submit" className="admin-create-button">✓ Create Geo-Fence</button>
           </form>
           
           {userLocation && (
             <div className="admin-location-info">
-              <p>📍 Your Current Location:</p>
+              <strong>📍 Your Current Location:</strong>
               <p>Lat: {userLocation.lat.toFixed(6)}, Lng: {userLocation.lng.toFixed(6)}</p>
             </div>
           )}
         </div>
         
         <div className="admin-map-container">
-          <h2>Map View</h2>
+          <h2>🗺️ Map View</h2>
           <div style={{ height: '400px', width: '100%' }}>
             <MapContainer
               center={mapCenter}
@@ -346,32 +346,36 @@ function AdminDashboard() {
       </div>
       
       <div className="admin-fences-list">
-        <h2>Existing Geo-Fences</h2>
+        <h2>📋 Existing Geo-Fences</h2>
         <div className="admin-fences-grid">
           {fences.length === 0 ? (
-            <p>No geo-fences created yet. Create one above!</p>
+            <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#999', paddingTop: '20px' }}>
+              ℹ️ No geo-fences created yet. Create one using the form above!
+            </p>
           ) : (
             fences.map((fence) => (
               <div key={fence.id} className="admin-fence-card">
-                <h3>{fence.name}</h3>
-                <p>📍 {fence.latitude.toFixed(6)}, {fence.longitude.toFixed(6)}</p>
-                <p>📏 Radius: {fence.radius} meters</p>
-                <p>👤 Created by: {fence.createdBy}</p>
-                <button 
-                  onClick={() => {
-                    setMapCenter([fence.latitude, fence.longitude]);
-                    setSelectedFence(fence);
-                  }}
-                  className="admin-view-button"
-                >
-                  View on Map
-                </button>
-                <button 
-                  onClick={() => handleDeleteFence(fence.id)}
-                  className="admin-delete-button"
-                >
-                  Delete
-                </button>
+                <h3 style={{ marginTop: 0, color: '#1e3c72' }}>📍 {fence.name}</h3>
+                <p style={{ margin: '8px 0', color: '#555' }}><strong>Location:</strong> {fence.latitude.toFixed(6)}, {fence.longitude.toFixed(6)}</p>
+                <p style={{ margin: '8px 0', color: '#555' }}><strong>Radius:</strong> {fence.radius} meters</p>
+                <p style={{ margin: '8px 0', color: '#555' }}><strong>Created by:</strong> {fence.createdBy}</p>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <button 
+                    onClick={() => {
+                      setMapCenter([fence.latitude, fence.longitude]);
+                      setSelectedFence(fence);
+                    }}
+                    className="admin-view-button"
+                  >
+                    📍 View on Map
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteFence(fence.id)}
+                    className="admin-delete-button"
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
               </div>
             ))
           )}
