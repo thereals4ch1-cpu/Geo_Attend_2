@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { auth, provider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
+import { API_BASE_URL } from '../config';
 import '../css/Login.css';
 
 function Login() {
@@ -16,7 +17,7 @@ function Login() {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password
       });
@@ -40,16 +41,23 @@ function Login() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
-      const response = await axios.post('http://localhost:5000/api/auth/google-signin', {
+      const userData = {
+        id: user.uid,
         uid: user.uid,
-        email: user.email
+        name: user.displayName || '',
+        email: user.email || '',
+        role: 'employee'
+      };
+
+      await axios.post(`${API_BASE_URL}/api/auth/google-signin`, {
+        uid: userData.uid,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role
       });
 
-      const { token, user: userData } = response.data;
-      localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
-      navigate(userData.role === 'admin' ? '/admin' : '/employee');
+      navigate('/employee');
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Google sign in failed');
     }
@@ -119,10 +127,13 @@ function Login() {
         <p className="login-note">
           Location access required for geo-verification
         </p>
+
+        <p className="login-signup">
+          Don't have an account? <Link to="/signup">Signup</Link>
+        </p>
       </div>
     </div>
   );
 }
 
 export default Login;
-

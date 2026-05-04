@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import '../css/AttendanceHistory.css';
 
 function AttendanceHistory() {
@@ -62,8 +63,8 @@ function AttendanceHistory() {
     setError('');
     try {
       const url = isAdmin && !userId
-        ? 'http://localhost:5000/api/attendance/all'
-        : `http://localhost:5000/api/attendance/user/${userId || currentUser.uid}`;
+        ? `${API_BASE_URL}/api/attendance/all`
+        : `${API_BASE_URL}/api/attendance/user/${userId || currentUser.uid}`;
       const response = await axios.get(url);
       setRecords(response.data || []);
       setFilteredRecords(response.data || []);
