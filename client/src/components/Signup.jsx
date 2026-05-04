@@ -117,9 +117,16 @@ function Signup() {
               <span>Phone Number</span>
               <input
                 type="tel"
-                placeholder="Enter phone number"
+                placeholder="Enter 10-digit phone number"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  if (val.length <= 10) {
+                    setPhoneNumber(val);
+                  }
+                }}
+                pattern="[0-9]{10}"
+                title="Phone number must be exactly 10 digits"
                 className="signup-input"
                 required
               />
