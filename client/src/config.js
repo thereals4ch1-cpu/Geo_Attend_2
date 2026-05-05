@@ -1,4 +1,7 @@
-// Change this to your deployed backend URL when hosting
-// If developing locally, you can use http://localhost:5000
-// For example, if you deploy to Render, it might be https://geo-attend-backend.onrender.com
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// In Vite dev, default to '' so requests go to the same origin (/api...) and vite.config.js proxies to Express on :5000.
+// Deployed: set VITE_API_URL to your backend URL, or rely on same-host /api routing.
+const raw = typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL.trim() : '';
+
+export const API_BASE_URL =
+  raw.replace(/\/+$/, '') ||
+  (import.meta.env.DEV ? '' : 'http://localhost:5000');

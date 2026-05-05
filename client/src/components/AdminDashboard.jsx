@@ -5,7 +5,6 @@ import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { MapContainer, TileLayer, Marker, Circle, Popup, useMapEvent } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import axios from 'axios';
 import '../css/AdminDashboard.css';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBje4_Uub9kYDf4H237qQ1xmNktwmBMMuM';
@@ -39,14 +38,6 @@ function AdminDashboard() {
   const [selectedFence, setSelectedFence] = useState(null);
   const navigate = useNavigate();
 
-  // Trip scheduling states
-  const [scheduledTrips, setScheduledTrips] = useState([]);
-  const [selectedUser, setSelectedUser] = useState('');
-  const [destination, setDestination] = useState('');
-  const [scheduledDate, setScheduledDate] = useState('');
-  const [scheduledTime, setScheduledTime] = useState('');
-  const [users, setUsers] = useState([]);
-
   const loadFences = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, 'geoFences'));
@@ -58,32 +49,6 @@ function AdminDashboard() {
       console.log('Loaded fences:', fencesData);
     } catch (error) {
       console.error('Error loading fences:', error);
-    }
-  };
-
-  const loadUsers = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'users'));
-      const usersData = [];
-      querySnapshot.forEach((doc) => {
-        usersData.push({ id: doc.id, ...doc.data() });
-      });
-      setUsers(usersData);
-    } catch (error) {
-      console.error('Error loading users:', error);
-    }
-  };
-
-  const loadScheduledTrips = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'scheduledTrips'));
-      const tripsData = [];
-      querySnapshot.forEach((doc) => {
-        tripsData.push({ id: doc.id, ...doc.data() });
-      });
-      setScheduledTrips(tripsData);
-    } catch (error) {
-      console.error('Error loading scheduled trips:', error);
     }
   };
 
@@ -216,6 +181,12 @@ function AdminDashboard() {
           >
             📊 Attendance History
           </button>
+          <button
+            onClick={() => navigate('/employee-schedule')}
+            className="admin-employees-button"
+          >
+            🗓️ Employee Schedule
+          </button>
           <button 
             onClick={() => navigate('/profile')} 
             className="admin-profile-button"
@@ -344,7 +315,7 @@ function AdminDashboard() {
           </div>
         </div>
       </div>
-      
+
       <div className="admin-fences-list">
         <h2>📋 Existing Geo-Fences</h2>
         <div className="admin-fences-grid">
