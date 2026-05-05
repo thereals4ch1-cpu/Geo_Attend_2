@@ -17,7 +17,8 @@ function Signup() {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || user.role !== 'admin') {
+    const token = localStorage.getItem('token');
+    if (!user || user.role !== 'admin' || !token) {
       navigate('/');
     }
   }, [navigate]);
@@ -28,12 +29,18 @@ function Signup() {
     setSuccess('');
     
     try {
+      const token = localStorage.getItem('token');
+      
       await axios.post(`${API_BASE_URL}/api/auth/signup`, {
         name,
         email,
         password,
         role,
         phoneNumber
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
       
       setSuccess('Account created successfully! Redirecting to user management...');

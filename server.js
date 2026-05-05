@@ -1,13 +1,27 @@
+const dotenv = require('dotenv');
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+}
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const cron = require('node-cron');
 const { admin, db } = require('./firebaseAdmin');
 
-dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://geoattend-92415.web.app',
+        'https://geoattend-92415.firebaseapp.com',
+        'http://localhost:5173',
+        'http://localhost:5000'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Import routes
@@ -26,7 +40,6 @@ cron.schedule('* * * * *', async () => {
         const now = new Date();
         const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
         
-        // Find schedules within the next minute that are 1 hour before
         const schedulesSnapshot = await db.collection('schedules')
             .where('scheduledTime', '>=', now)
             .where('scheduledTime', '<=', oneHourLater)
@@ -35,10 +48,9 @@ cron.schedule('* * * * *', async () => {
         for (const doc of schedulesSnapshot.docs) {
             const schedule = doc.data();
             const scheduledTime = schedule.scheduledTime.toDate();
-            const diff = (scheduledTime - now) / (1000 * 60); // minutes
+            const diff = (scheduledTime - now) / (1000 * 60);
             
-            if (Math.abs(diff - 60) <= 1) { // within 1 minute of 1 hour before
-                // Get user token
+            if (Math.abs(diff - 60) <= 1) {
                 const tokenDoc = await db.collection('userTokens').doc(schedule.employeeId).get();
                 if (tokenDoc.exists) {
                     const token = tokenDoc.data().token;

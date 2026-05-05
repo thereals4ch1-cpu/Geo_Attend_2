@@ -1,0 +1,6 @@
+client/
+node_modules
+.env
+serviceAccountKey.json
+.firebase
+.github

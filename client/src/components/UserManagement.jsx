@@ -143,7 +143,7 @@ function UserManagement() {
           <button onClick={loadUsers} className="user-management-refresh-button">
             Refresh
           </button>
-          <button onClick={() => navigate('/signup')} className="user-management-add-button">
+          <button onClick={() => navigate('/signup', { replace: true })} className="user-management-add-button">
             Add User
           </button>
         </div>
