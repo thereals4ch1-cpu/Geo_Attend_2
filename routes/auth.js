@@ -32,22 +32,40 @@ router.post('/signup', authenticateToken, authorizeAdmin, async (req, res) => {
     try {
         const { email, password, name, role } = req.body;
         
-        // Create user in Firebase Auth
         const userRecord = await auth.createUser({
             email,
             password,
             displayName: name
         });
         
-        // Store additional user data in Firestore
         await db.collection('users').doc(userRecord.uid).set({
             name,
             email,
-            role, // 'admin' or 'employee'
+            role,
             createdAt: new Date()
         });
         
         res.status(201).json({ message: 'User created successfully', uid: userRecord.uid });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Delete user route
+router.delete('/delete/:uid', authenticateToken, authorizeAdmin, async (req, res) => {
+    try {
+        const { uid } = req.params;
+
+        // Delete from Firebase Auth
+        await auth.deleteUser(uid);
+
+        // Delete from Firestore
+        await db.collection('users').doc(uid).delete();
+
+        // Delete FCM token if exists
+        await db.collection('userTokens').doc(uid).delete().catch(() => {});
+
+        res.json({ message: 'User deleted successfully' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -58,7 +76,6 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         
-        // Get user from Firestore by email
         const usersSnapshot = await db.collection('users')
             .where('email', '==', email)
             .get();
@@ -70,7 +87,6 @@ router.post('/login', async (req, res) => {
         const userDoc = usersSnapshot.docs[0];
         const userData = userDoc.data();
         
-        // Create JWT token
         const token = jwt.sign(
             { userId: userDoc.id, email: userData.email, role: userData.role },
             process.env.JWT_SECRET,
@@ -91,7 +107,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Google auth helper route: only sign in existing registered users
+// Google auth helper route
 router.post('/google-signin', async (req, res) => {
     try {
         const { uid, email } = req.body;

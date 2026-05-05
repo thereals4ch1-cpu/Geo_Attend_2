@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { db } from '../firebase';
 import { collection, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { API_BASE_URL } from '../config';
 import '../css/UserManagement.css';
 
 function UserManagement() {
@@ -83,11 +84,16 @@ function UserManagement() {
       setError('');
       setSuccess('');
       try {
-        await deleteDoc(doc(db, 'users', userId));
+        const token = localStorage.getItem('token');
+        await axios.delete(`${API_BASE_URL}/api/auth/delete/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         setSuccess('User deleted successfully!');
         loadUsers();
       } catch (err) {
-        setError('Failed to delete user: ' + err.message);
+        setError('Failed to delete user: ' + err.response?.data?.error || err.message);
         console.error(err);
       }
     }
