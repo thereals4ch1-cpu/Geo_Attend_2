@@ -1,0 +1,35 @@
+{
+  "name": "geo-attend",
+  "version": "1.0.0",
+  "description": "Attendance marking app with geo-fencing",
+  "main": "server.js",
+  "scripts": {
+    "server": "node server.js",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "attendance",
+    "geo-fencing",
+    "firebase",
+    "express",
+    "react"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "firebase-admin": "^11.11.1",
+    "jsonwebtoken": "^9.0.3",
+    "node-cron": "^4.2.1",
+    "pip": "^0.0.1",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

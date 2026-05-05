@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.DS_Store
+dist/
+build/
+migration-temp/
+
+serviceAccountKey.json
+
+serviceAccountKey.json
