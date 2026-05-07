@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
@@ -37,6 +37,7 @@ function AdminDashboard() {
   const [mapCenter, setMapCenter] = useState([6.9271, 79.8612]);
   const [selectedFence, setSelectedFence] = useState(null);
   const navigate = useNavigate();
+  const mapRef = useRef();
 
   const loadFences = async () => {
     try {
@@ -164,6 +165,43 @@ function AdminDashboard() {
     getCurrentLocation();
   }, [navigate]);
 
+  useEffect(() => {
+    const initAutocomplete = () => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        const input = document.getElementById('map-search-input');
+        if (input) {
+          const autocomplete = new window.google.maps.places.Autocomplete(input, {
+            types: ['geocode'], // Search for places, addresses, etc.
+          });
+          autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
+              const lat = place.geometry.location.lat();
+              const lng = place.geometry.location.lng();
+              if (mapRef.current) {
+                mapRef.current.setView([lat, lng], 15);
+                setMapCenter([lat, lng]);
+              }
+            }
+          });
+        }
+      }
+    };
+
+    // Check if Google Maps is loaded
+    if (window.google) {
+      initAutocomplete();
+    } else {
+      // Wait for it to load
+      const checkGoogle = setInterval(() => {
+        if (window.google) {
+          clearInterval(checkGoogle);
+          initAutocomplete();
+        }
+      }, 100);
+    }
+  }, []);
+
   return (
     <div className="admin-container">
       <div className="admin-header">
@@ -253,6 +291,7 @@ function AdminDashboard() {
           <h2>🗺️ Map View</h2>
           <div style={{ height: '400px', width: '100%' }}>
             <MapContainer
+              ref={mapRef}
               center={mapCenter}
               zoom={15}
               style={{ height: '100%', width: '100%', borderRadius: '8px' }}
@@ -305,6 +344,15 @@ function AdminDashboard() {
                 </React.Fragment>
               ))}
             </MapContainer>
+          </div>
+          
+          <div className="admin-map-search">
+            <input
+              id="map-search-input"
+              type="text"
+              placeholder="Search for a location..."
+              className="admin-search-input"
+            />
           </div>
           
           <div className="admin-map-legend">

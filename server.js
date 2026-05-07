@@ -8,6 +8,19 @@ const cors = require('cors');
 const cron = require('node-cron');
 const { admin, db } = require('./firebaseAdmin');
 
+const DEFAULT_TEMPLATE = 'Hello {{employeeName}}, you are scheduled at {{destination}} on {{scheduledAt}}. Stay there for {{durationMinutes}} minutes (until {{expectedEndTime}}).';
+const TEXTIT_API_URL = process.env.TEXTIT_API_URL || 'https://api.textit.biz';
+const TEXTIT_AUTH_TOKEN = process.env.TEXTIT_AUTH_TOKEN || '1684gkd1611346bc6dtd41cadh5764';
+
+function fillTemplate(template, values) {
+    let content = template;
+    Object.entries(values).forEach(([key, value]) => {
+        const pattern = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+        content = content.replace(pattern, String(value ?? ''));
+    });
+    return content;
+}
+
 const app = express();
 
 app.use(cors({
@@ -34,42 +47,64 @@ app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/schedules', schedulesRoutes);
 
-// Schedule notifications
-cron.schedule('* * * * *', async () => {
+// Schedule SMS notifications 24 hours before
+cron.schedule('*/5 * * * *', async () => { // Run every 5 minutes
     try {
         const now = new Date();
-        const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
         
         const schedulesSnapshot = await db.collection('schedules')
-            .where('scheduledTime', '>=', now)
-            .where('scheduledTime', '<=', oneHourLater)
+            .where('notificationSent', '==', false)
+            .where('notificationTime', '<=', now)
             .get();
         
         for (const doc of schedulesSnapshot.docs) {
             const schedule = doc.data();
-            const scheduledTime = schedule.scheduledTime.toDate();
-            const diff = (scheduledTime - now) / (1000 * 60);
+            const employeeDoc = await db.collection('users').doc(schedule.employeeId).get();
+            const employee = employeeDoc.exists ? employeeDoc.data() : {};
             
-            if (Math.abs(diff - 60) <= 1) {
-                const tokenDoc = await db.collection('userTokens').doc(schedule.employeeId).get();
-                if (tokenDoc.exists) {
-                    const token = tokenDoc.data().token;
+            const employeePhone = employee.phone || employee.mobile || employee.phoneNumber;
+            const token = process.env.TEXTIT_AUTH_TOKEN || '1684gkd1611346bc6dtd41cadh5764';
+            
+            if (employeePhone && token) {
+                try {
+                    const messageText = fillTemplate(DEFAULT_TEMPLATE, {
+                        employeeName: schedule.employeeName || 'Employee',
+                        destination: schedule.destination,
+                        scheduledAt: schedule.scheduledTime.toDate().toLocaleString(),
+                        durationMinutes: schedule.durationMinutes,
+                        expectedEndTime: schedule.expectedEndTime.toDate().toLocaleString()
+                    });
                     
-                    const message = {
-                        notification: {
-                            title: 'Scheduled Departure Reminder',
-                            body: `You have a scheduled trip to ${schedule.destination} at ${scheduledTime.toLocaleTimeString()}.`
+                    const response = await fetch(`${TEXTIT_API_URL}/api/v2/broadcasts.json`, {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Token ${TEXTIT_AUTH_TOKEN}`,
+                            'Content-Type': 'application/json'
                         },
-                        token: token
-                    };
+                        body: JSON.stringify({
+                            text: messageText,
+                            urns: [`tel:${employeePhone}`]
+                        })
+                    });
                     
-                    await admin.messaging().send(message);
-                    console.log('Notification sent to', schedule.employeeId);
+                    if (response.ok) {
+                        await db.collection('schedules').doc(doc.id).update({
+                            notificationSent: true,
+                            notificationSentAt: new Date()
+                        });
+                        console.log('SMS sent to', employeePhone, 'for schedule', doc.id);
+                    } else {
+                        console.error('Failed to send SMS for schedule', doc.id, 'status:', response.status);
+                    }
+                } catch (error) {
+                    console.error('Error sending SMS for schedule', doc.id, error);
                 }
+            } else {
+                console.log('Missing phone or token for employee', schedule.employeeId);
             }
         }
     } catch (error) {
-        console.error('Error in notification scheduler:', error);
+        console.error('Error in SMS scheduler:', error);
     }
 });
 

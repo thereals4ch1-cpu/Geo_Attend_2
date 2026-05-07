@@ -33,6 +33,7 @@ router.post('/', async (req, res) => {
         }
 
         const expectedEndTime = new Date(scheduledAt.getTime() + duration * 60 * 1000);
+        const notificationTime = new Date(scheduledAt.getTime() - 24 * 60 * 60 * 1000); // 24 hours before
         const employeeDoc = await db.collection('users').doc(employeeId).get();
         const employee = employeeDoc.exists ? employeeDoc.data() : {};
 
@@ -43,62 +44,16 @@ router.post('/', async (req, res) => {
             scheduledTime: scheduledAt,
             durationMinutes: duration,
             expectedEndTime,
+            notificationTime,
+            notificationSent: false,
             createdAt: new Date()
         });
-
-        let messageSent = false;
-        let messageError = null;
-
-        try {
-            const token = process.env.TEXTIT_AUTH_TOKEN;
-            const employeePhone = employee.phone || employee.mobile || employee.phoneNumber;
-
-            if (!token) {
-                messageError = 'TEXTIT_AUTH_TOKEN is not configured on backend.';
-            } else if (!employeePhone) {
-                messageError = 'Employee phone number missing. Save phone/mobile/phoneNumber in users collection.';
-            } else {
-                const template = (messageTemplate && String(messageTemplate).trim())
-                    || process.env.TEXTIT_SCHEDULE_TEMPLATE
-                    || DEFAULT_TEMPLATE;
-
-                const messageText = fillTemplate(template, {
-                    employeeName: employee.name || 'Employee',
-                    destination,
-                    scheduledAt: scheduledAt.toLocaleString(),
-                    durationMinutes: duration,
-                    expectedEndTime: expectedEndTime.toLocaleString()
-                });
-
-                const apiUrl = process.env.TEXTIT_API_URL || 'https://api.textit.biz';
-                const response = await fetch(`${apiUrl}/api/v2/broadcasts.json`, {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        text: messageText,
-                        urns: [`tel:${employeePhone}`]
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`TextIt error ${response.status}: ${errorText}`);
-                }
-
-                messageSent = true;
-            }
-        } catch (notifyError) {
-            messageError = notifyError.message;
-        }
 
         res.status(201).json({
             message: 'Schedule created successfully',
             id: docRef.id,
-            messageSent,
-            messageError
+            messageSent: false,
+            messageError: null
         });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -180,6 +135,7 @@ router.put('/:scheduleId', async (req, res) => {
         }
 
         const expectedEndTime = new Date(scheduledAt.getTime() + duration * 60 * 1000);
+        const notificationTime = new Date(scheduledAt.getTime() - 24 * 60 * 60 * 1000); // 24 hours before
         const employeeDoc = await db.collection('users').doc(employeeId).get();
         const employee = employeeDoc.exists ? employeeDoc.data() : {};
 
@@ -190,6 +146,8 @@ router.put('/:scheduleId', async (req, res) => {
             scheduledTime: scheduledAt,
             durationMinutes: duration,
             expectedEndTime,
+            notificationTime,
+            notificationSent: false, // Reset if time changed
             updatedAt: new Date()
         });
 

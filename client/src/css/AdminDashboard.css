@@ -187,8 +187,38 @@
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-  height: 500px;
   border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.admin-map-search {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e6ed;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  color: #1e3c72;
+  caret-color: #00d4ff;
+  -webkit-text-fill-color: #1e3c72;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.admin-search-input:focus {
+  outline: none;
+  border-color: #00d4ff;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.1);
+}
+
+.admin-search-input::placeholder {
+  color: #999;
 }
 
 .admin-fences-list {
